@@ -42,7 +42,10 @@ func (g *Game) Update() error {
 	if !pressed {
 		return nil
 	}
-	g.Player.X, g.Player.Y = x, y
+	t := g.MapScene.TileForPos(int(x+16/2), int(y)) // to consider as position the middle-bottom pixel
+	if !t.Properties.HasPropertyAs("blocked", "true") {
+		g.Player.X, g.Player.Y = x, y
+	}
 	return nil
 }
 
