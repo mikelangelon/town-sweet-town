@@ -17,7 +17,7 @@ func main() {
 		slog.Error("crash parseTileSet", "error", err)
 		return
 	}
-	town2, err := graphics.NewMapScene(assets.TileMapPacked, assets.Town2, assets.TileMapPackedTSX, common.ScreenWidth, common.ScreenHeight, common.Scale)
+	people1, err := graphics.NewMapScene(assets.TileMapPacked, assets.People1, assets.TileMapPackedTSX, common.ScreenWidth, common.ScreenHeight, common.Scale)
 	if err != nil {
 		slog.Error("crash parseTileSet", "error", err)
 		return
@@ -29,17 +29,25 @@ func main() {
 	}
 	char := charFactory.NewChar(1, []int{10, 111, 304}, 16*6, 16*6)
 
+	// set scenes
 	state := scenes.State{
 		Player: char,
+		Status: scenes.InitialState,
 	}
-	sm := stagehand.NewSceneManager[scenes.State](&scenes.Town1Scene{
+	people1Scene := &scenes.PeopleScene{
+		MapScene: people1,
+	}
+	town1Scene := &scenes.Town1Scene{
 		MapScene: town1,
-		TransitionPoints: map[common.Position]stagehand.Scene[scenes.State]{
-			common.Position{X: 24 * 16, Y: 6 * 16}: &scenes.Town2Scene{
-				MapScene: town2,
-			},
-		},
-	}, state)
+	}
+	town1Scene.TransitionPoints = map[common.Position]stagehand.Scene[scenes.State]{
+		common.Position{X: 24 * 16, Y: 6 * 16}: people1Scene,
+	}
+	people1Scene.TransitionPoints = map[common.Position]stagehand.Scene[scenes.State]{
+		common.Position{X: 0 * 16, Y: 6 * 16}: town1Scene,
+	}
+
+	sm := stagehand.NewSceneManager[scenes.State](town1Scene, state)
 	ebiten.SetWindowSize(common.ScreenWidth, common.ScreenHeight)
 	if err := ebiten.RunGame(sm); err != nil {
 		slog.Error("something went wrong", "err", err)

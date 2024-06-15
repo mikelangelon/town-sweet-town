@@ -63,3 +63,17 @@ func (ts *Town1Scene) Update() error {
 	}
 	return nil
 }
+
+func (ts *Town1Scene) Load(st State, sm stagehand.SceneController[State]) {
+	if st.Status == InitialState {
+		st.Status = Playing
+		ts.BaseScene.Load(st, sm)
+		return
+	}
+	ts.BaseScene.Load(st, sm)
+	timer := time.NewTimer(500 * time.Millisecond)
+	go func() {
+		<-timer.C
+		ts.state.Player.X, ts.state.Player.Y = 24*16, 6*16
+	}()
+}

@@ -20,6 +20,9 @@ var (
 	//go:embed town3.tmx
 	Town3 []byte
 
+	//go:embed people1.tmx
+	People1 []byte
+
 	//go:embed roguelikeChar_transparent.png
 	Characters []byte
 
