@@ -9,3 +9,7 @@ There are some hidden rules to make your town happy, you have 5 days for your ta
 [] Build a basic game with a map, a player and a town
 [] Put NPCs on a side
 [] Select them ...?
+
+# Assets
+
+https://kenney.nl/assets/tiny-town
