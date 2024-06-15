@@ -1,11 +1,13 @@
 package scenes
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/joelschutz/stagehand"
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
+	"github.com/solarlune/resolv"
 	"image"
 	"time"
 )
@@ -62,6 +64,30 @@ func (bs *BaseScene) Update() error {
 		pressed = true
 		x += speed
 	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		// TODO it seems a bit inneficient to recreate this every time
+		space := resolv.NewSpace(640, 480, 16, 16)
+		player := resolv.NewObject(float64(bs.state.Player.X), float64(bs.state.Player.Y), 16, 16)
+		space.Add(player)
+		for i, v := range bs.NPCs {
+			v.ID = fmt.Sprintf("%d", i)
+			npc := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
+			npc.Data = v
+			space.Add(npc)
+		}
+
+		if collision := player.Check(16, 0); collision != nil {
+			if c, ok := collision.Objects[0].Data.(*graphics.NPC); ok {
+				fmt.Printf("talking to one NPC: %s", c.ID)
+			}
+		}
+		if collision := player.Check(-16, 0); collision != nil {
+			if c, ok := collision.Objects[0].Data.(*graphics.NPC); ok {
+				fmt.Printf("talking to one NPC: %s", c.ID)
+			}
+		}
+	}
+
 	if x > (common.ScreenWidth-16)/common.Scale || x < 0 ||
 		y < 0 || y > (common.ScreenHeight-16)/common.Scale {
 		return nil

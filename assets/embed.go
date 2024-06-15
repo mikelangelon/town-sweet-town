@@ -28,4 +28,7 @@ var (
 
 	//go:embed roguelikeChar_transparent.tsx
 	CharactersTSX []byte
+
+	//go:embed holstein-regular.ttf
+	HolsteinFont []byte
 )

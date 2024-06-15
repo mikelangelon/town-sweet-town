@@ -5,6 +5,7 @@ import (
 )
 
 type Char struct {
+	ID    string
 	Image *ebiten.Image
 	X, Y  int64
 
