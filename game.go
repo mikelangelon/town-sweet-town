@@ -13,6 +13,7 @@ const (
 
 type Game struct {
 	MapScene *graphics.MapScene
+	Player   *graphics.Char
 }
 
 func (g *Game) Update() error {
@@ -21,6 +22,7 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.MapScene.Draw(screen)
+	g.Player.Draw(screen)
 }
 
 func (g *Game) Layout(ow, oh int) (int, int) {

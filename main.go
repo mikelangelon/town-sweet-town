@@ -13,10 +13,17 @@ func main() {
 		slog.Error("crash parseTileSet", "error", err)
 		return
 	}
+	charFactory, err := graphics.NewCharFactory(assets.Characters, assets.CharactersTSX, scale)
+	if err != nil {
+		slog.Error("crash parseTileSet", "error", err)
+		return
+	}
+	char := charFactory.NewChar(1, []int{10, 111, 304}, 80, 120)
 	game := &Game{
 		MapScene: town1,
+		Player:   char,
 	}
-	ebiten.SetWindowSize(800, 600)
+	ebiten.SetWindowSize(screenWidth, screenHeight)
 	if err := ebiten.RunGame(game); err != nil {
 		slog.Error("something went wrong", "err", err)
 	}
