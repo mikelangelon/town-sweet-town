@@ -39,6 +39,11 @@ func (g *Game) Update() error {
 		pressed = true
 		x += speed
 	}
+	if x > (screenWidth-16)/scale || x < 0 ||
+		y < 0 || y > (screenHeight-16)/scale {
+		return nil
+	}
+
 	if !pressed {
 		return nil
 	}
