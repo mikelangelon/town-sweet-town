@@ -35,9 +35,16 @@ func main() {
 		Status: scenes.InitialState,
 	}
 	people1Scene := &scenes.BaseScene{
+		ID:       "people",
 		MapScene: people1,
+		NPCs: []*graphics.NPC{
+			charFactory.NewNPC(1, []int{10, 111, 304}, 16*24, 16*6, common.Position{X: 16 * 20, Y: 16 * 6}),
+			charFactory.NewNPC(271, nil, 16*24, 16*11, common.Position{X: 16 * 19, Y: 16 * 11}),
+			charFactory.NewNPC(162, []int{389, 476, 312}, 16*26, 16*9, common.Position{X: 16 * 21, Y: 16 * 6}),
+		},
 	}
 	town1Scene := &scenes.BaseScene{
+		ID:       "town1",
 		MapScene: town1,
 	}
 	town1Scene.TransitionPoints = scenes.Transition{

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/mikelangelon/town-sweet-town/common"
 	"image"
 )
 
@@ -64,5 +65,19 @@ func (c *CharFactory) NewChar(id int, withIDs []int, x, y int64) *Char {
 		scaleX: float64(c.scale),
 		scaleY: float64(c.scale),
 		Stuff:  c.CharImages(withIDs),
+	}
+}
+
+func (c *CharFactory) NewNPC(id int, withIDs []int, x, y int64, move common.Position) *NPC {
+	return &NPC{
+		Char: Char{
+			Image:  c.CharImage(id),
+			X:      x,
+			Y:      y,
+			scaleX: float64(c.scale),
+			scaleY: float64(c.scale),
+			Stuff:  c.CharImages(withIDs),
+		},
+		Move: move,
 	}
 }

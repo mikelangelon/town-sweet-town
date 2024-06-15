@@ -1,6 +1,8 @@
 package graphics
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type Char struct {
 	Image *ebiten.Image
@@ -20,8 +22,4 @@ func (c *Char) Draw(screen *ebiten.Image) {
 	for _, v := range c.Stuff {
 		screen.DrawImage(v, op)
 	}
-}
-
-func (c *Char) Talk() string {
-	return "Welcome<NEXT>I hope you like this place<NEXT>Good luck!"
 }

@@ -10,11 +10,6 @@ import (
 	"time"
 )
 
-type Transition struct {
-	Position  common.Position
-	Scene     stagehand.Scene[State]
-	Direction stagehand.SlideDirection
-}
 type BaseScene struct {
 	bounds image.Rectangle
 	state  State
@@ -22,6 +17,7 @@ type BaseScene struct {
 
 	ID               string
 	MapScene         *graphics.MapScene
+	NPCs             []*graphics.NPC
 	TransitionPoints Transition
 }
 
@@ -37,9 +33,15 @@ func (bs *BaseScene) Unload() State {
 func (bs *BaseScene) Draw(screen *ebiten.Image) {
 	bs.MapScene.Draw(screen)
 	bs.state.Player.Draw(screen)
+	for _, v := range bs.NPCs {
+		v.Draw(screen)
+	}
 }
 
 func (bs *BaseScene) Update() error {
+	for _, v := range bs.NPCs {
+		v.Update()
+	}
 	var speed int64 = common.TileSize
 	var pressed = false
 
