@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/mikelangelon/town-sweet-town/graphics"
 )
 
@@ -9,6 +10,7 @@ const (
 	screenWidth  = 800
 	screenHeight = 600
 	scale        = 2
+	tileSize     = 16
 )
 
 type Game struct {
@@ -17,6 +19,30 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
+	var speed int64 = tileSize
+	var pressed = false
+
+	x, y := g.Player.X, g.Player.Y
+	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
+		pressed = true
+		y -= speed
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
+		pressed = true
+		y += speed
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
+		pressed = true
+		x -= speed
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
+		pressed = true
+		x += speed
+	}
+	if !pressed {
+		return nil
+	}
+	g.Player.X, g.Player.Y = x, y
 	return nil
 }
 

@@ -18,7 +18,7 @@ func main() {
 		slog.Error("crash parseTileSet", "error", err)
 		return
 	}
-	char := charFactory.NewChar(1, []int{10, 111, 304}, 80, 120)
+	char := charFactory.NewChar(1, []int{10, 111, 304}, 16*6, 16*6)
 	game := &Game{
 		MapScene: town1,
 		Player:   char,
