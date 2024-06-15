@@ -34,19 +34,22 @@ func main() {
 		Player: char,
 		Status: scenes.InitialState,
 	}
-	people1Scene := &scenes.PeopleScene{
+	people1Scene := &scenes.BaseScene{
 		MapScene: people1,
 	}
-	town1Scene := &scenes.Town1Scene{
+	town1Scene := &scenes.BaseScene{
 		MapScene: town1,
 	}
-	town1Scene.TransitionPoints = map[common.Position]stagehand.Scene[scenes.State]{
-		common.Position{X: 24 * 16, Y: 6 * 16}: people1Scene,
+	town1Scene.TransitionPoints = scenes.Transition{
+		Position:  common.Position{X: 24 * 16, Y: 6 * 16},
+		Scene:     people1Scene,
+		Direction: stagehand.RightToLeft,
 	}
-	people1Scene.TransitionPoints = map[common.Position]stagehand.Scene[scenes.State]{
-		common.Position{X: 0 * 16, Y: 6 * 16}: town1Scene,
+	people1Scene.TransitionPoints = scenes.Transition{
+		Position:  common.Position{X: 0 * 16, Y: 6 * 16},
+		Scene:     town1Scene,
+		Direction: stagehand.LeftToRight,
 	}
-
 	sm := stagehand.NewSceneManager[scenes.State](town1Scene, state)
 	ebiten.SetWindowSize(common.ScreenWidth, common.ScreenHeight)
 	if err := ebiten.RunGame(sm); err != nil {
