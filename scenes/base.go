@@ -7,6 +7,7 @@ import (
 	"github.com/joelschutz/stagehand"
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
+	"github.com/mikelangelon/town-sweet-town/npc"
 	"github.com/mikelangelon/town-sweet-town/textbox"
 	"github.com/solarlune/resolv"
 	"image"
@@ -20,7 +21,7 @@ type BaseScene struct {
 
 	ID               string
 	MapScene         *graphics.MapScene
-	NPCs             []*graphics.NPC
+	NPCs             []*npc.NPC
 	TransitionPoints Transition
 	Text             textbox.TextBox
 }
@@ -86,14 +87,12 @@ func (bs *BaseScene) Update() error {
 		}
 
 		if collision := player.Check(16, 0); collision != nil {
-			if c, ok := collision.Objects[0].Data.(*graphics.NPC); ok {
-				fmt.Printf("talking to one NPC: %s", c.ID)
+			if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
 				bs.Text.Show(c.Talk())
 			}
 		}
 		if collision := player.Check(-16, 0); collision != nil {
-			if c, ok := collision.Objects[0].Data.(*graphics.NPC); ok {
-				fmt.Printf("talking to one NPC: %s", c.ID)
+			if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
 				bs.Text.Show(c.Talk())
 			}
 		}

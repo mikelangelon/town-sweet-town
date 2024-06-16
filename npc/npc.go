@@ -1,15 +1,23 @@
-package graphics
+package npc
 
 import (
+	"fmt"
 	"github.com/mikelangelon/town-sweet-town/common"
+	"github.com/mikelangelon/town-sweet-town/graphics"
 	"time"
 )
 
+type Characteristic struct {
+	Name  string
+	Level int64
+}
+
 type NPC struct {
-	Char
-	Move    common.Position
-	moving  bool
-	Phrases []string
+	graphics.Char
+	Move            common.Position
+	moving          bool
+	Phrases         []string
+	Characteristics []Characteristic
 }
 
 func (n *NPC) Update() error {
@@ -31,5 +39,8 @@ func (n *NPC) Update() error {
 }
 
 func (n *NPC) Talk() []string {
-	return []string{"Welcome", "I hope you like this place", "Good luck!"}
+	return []string{
+		fmt.Sprintf("My name is %s", n.ID),
+		"I hope you like this place",
+		"Good luck!"}
 }

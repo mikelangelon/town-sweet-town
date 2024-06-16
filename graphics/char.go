@@ -9,14 +9,14 @@ type Char struct {
 	Image *ebiten.Image
 	X, Y  int64
 
-	scaleX, scaleY float64
+	ScaleX, ScaleY float64
 	Stuff          []*ebiten.Image
 }
 
 func (c *Char) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(c.X), float64(c.Y))
-	op.GeoM.Scale(c.scaleX, c.scaleY)
+	op.GeoM.Scale(c.ScaleX, c.ScaleY)
 
 	screen.DrawImage(c.Image, op)
 

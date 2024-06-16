@@ -4,11 +4,13 @@ go 1.22.3
 
 require (
 	github.com/hajimehoshi/ebiten/v2 v2.7.5
+	github.com/icrowley/fake v0.0.0-20221112152111-d7b7e2276db2
 	github.com/joelschutz/stagehand v1.1.1
 	github.com/solarlune/resolv v0.7.0
 )
 
 require (
+	github.com/corpix/uarand v0.0.0-20170723150923-031be390f409 // indirect
 	github.com/ebitengine/gomobile v0.0.0-20240518074828-e86332849895 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/purego v0.7.1 // indirect
