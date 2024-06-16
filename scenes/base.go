@@ -125,8 +125,10 @@ func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
 		bs.sm = sm.(*stagehand.SceneManager[State])
 		return
 	}
+
 	bs.state = st
 	bs.sm = sm.(*stagehand.SceneManager[State])
+	bs.NPCs = bs.state.NPCs[bs.ID]
 	timer := time.NewTimer(500 * time.Millisecond)
 	go func() {
 		<-timer.C
