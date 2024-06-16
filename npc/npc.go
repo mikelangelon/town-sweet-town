@@ -13,6 +13,7 @@ type NPC struct {
 	moving  bool
 	Phrases []string
 	Chars   Chars
+	HouseID *string
 }
 
 func (n *NPC) Update() error {
@@ -25,7 +26,7 @@ func (n *NPC) Update() error {
 		n.Char.X -= 16
 	}
 	n.moving = true
-	timer := time.NewTimer(800 * time.Millisecond)
+	timer := time.NewTimer(400 * time.Millisecond)
 	go func() {
 		<-timer.C
 		n.moving = false
@@ -39,6 +40,9 @@ func (n *NPC) Talk() []string {
 	}
 	for _, v := range n.Chars.AsPhrases() {
 		result = append(result, v)
+	}
+	if n.HouseID == nil {
+		result = append(result, "Could I live in one house, please?")
 	}
 	return result
 }

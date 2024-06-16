@@ -70,4 +70,9 @@ const (
 	Cooking    = "Cooking"
 	Music      = "Music"
 	Animals    = "Animals"
+
+	Quite = "Quite"
+	Big   = "Big"
+	Humid = "Humid"
+	Fancy = "Fancy"
 )

@@ -3,19 +3,32 @@ package textbox
 import (
 	"bytes"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	text "github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/mikelangelon/town-sweet-town/assets"
+	"github.com/mikelangelon/town-sweet-town/common"
+	"github.com/mikelangelon/town-sweet-town/npc"
 	"image/color"
 	"strings"
 )
 
-var backgroundColor = color.RGBA{50, 50, 50, 150}
+var (
+	backgroundColor = color.RGBA{50, 50, 50, 150}
+	selectedColor   = color.RGBA{150, 150, 150, 150}
+)
+
+const NoResponse = "None"
 
 type TextBox struct {
 	visible  bool
 	text     string
 	nextText *string
-	next     []string
+	// has next phases. Also, for now defined when to do the question(if any)
+	next []string
+
+	Options        []string
+	SelectedOption int
+	NPC            *npc.NPC
 }
 
 const (
@@ -24,6 +37,32 @@ const (
 	boxW int     = 500
 	boxH int     = 150
 )
+
+func (c *TextBox) Update() error {
+	if !c.visible {
+		return nil
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		if !c.hasNext() {
+			answer := c.Options[c.SelectedOption]
+			if answer != NoResponse {
+				c.NPC.HouseID = &answer
+				c.NPC.Move = common.Position{X: -16, Y: c.NPC.Y}
+			}
+			c.selectDefaultAnswer()
+		}
+		c.Next()
+	}
+	if !c.hasNext() {
+		if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
+			c.SelectedOption--
+		}
+		if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
+			c.SelectedOption++
+		}
+	}
+	return nil
+}
 
 func (c *TextBox) Draw(screen *ebiten.Image) {
 	if !c.visible {
@@ -34,8 +73,20 @@ func (c *TextBox) Draw(screen *ebiten.Image) {
 	screen.DrawImage(c.drawBackground(), op)
 	op2 := &text.DrawOptions{}
 	op2.GeoM.Translate(boxX, boxY)
-	drawText(screen, c.text, op2)
 
+	_, h := drawText(screen, c.text, op2)
+	font := guiFont(20)
+	if !c.hasNext() {
+		for i, v := range c.Options {
+			h += 20
+			op2 := &text.DrawOptions{}
+			op2.GeoM.Translate(boxX+10, boxY+float64(h))
+			if i == c.SelectedOption {
+				op2.ColorScale.ScaleWithColor(selectedColor)
+			}
+			text.Draw(screen, v, font, op2)
+		}
+	}
 }
 
 func (c *TextBox) drawBackground() *ebiten.Image {
@@ -60,8 +111,12 @@ func (c *TextBox) Visible() bool {
 	return c.visible
 }
 
+func (c *TextBox) hasNext() bool {
+	return len(c.next) > 0
+}
+
 func (c *TextBox) Next() {
-	if len(c.next) > 0 {
+	if c.hasNext() {
 		c.Show(c.next)
 		return
 	}
@@ -77,6 +132,21 @@ func (c *TextBox) Show(text []string) {
 	c.next = text[1:]
 }
 
+func (c *TextBox) ShowAndQuestion(npc *npc.NPC, options []string) {
+	c.Show(npc.Talk())
+	c.Options = options
+	c.NPC = npc
+	c.selectDefaultAnswer()
+}
+
+func (c *TextBox) selectDefaultAnswer() {
+	c.SelectedOption = 0
+	for i, v := range c.Options {
+		if v == NoResponse {
+			c.SelectedOption = i
+		}
+	}
+}
 func guiFont(size float64) *text.GoTextFace {
 	s, err := text.NewGoTextFaceSource(bytes.NewReader(assets.HolsteinFont))
 	if err != nil {

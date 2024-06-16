@@ -45,11 +45,10 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 
 func (bs *BaseScene) Update() error {
 	if bs.Text.Visible() {
-		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			bs.Text.Next()
-		}
+		bs.Text.Update()
 		return nil
 	}
+
 	for _, v := range bs.NPCs {
 		v.Update()
 	}
@@ -86,12 +85,12 @@ func (bs *BaseScene) Update() error {
 
 		if collision := player.Check(16, 0); collision != nil {
 			if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
-				bs.Text.Show(c.Talk())
+				bs.Text.ShowAndQuestion(c, []string{"House 1", "House 2", textbox.NoResponse})
 			}
 		}
 		if collision := player.Check(-16, 0); collision != nil {
 			if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
-				bs.Text.Show(c.Talk())
+				bs.Text.ShowAndQuestion(c, []string{"House 1", "House 2", textbox.NoResponse})
 			}
 		}
 	}
