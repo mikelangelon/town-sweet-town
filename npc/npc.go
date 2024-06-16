@@ -7,17 +7,12 @@ import (
 	"time"
 )
 
-type Characteristic struct {
-	Name  string
-	Level int64
-}
-
 type NPC struct {
 	graphics.Char
-	Move            common.Position
-	moving          bool
-	Phrases         []string
-	Characteristics []Characteristic
+	Move    common.Position
+	moving  bool
+	Phrases []string
+	Chars   Chars
 }
 
 func (n *NPC) Update() error {
@@ -39,8 +34,11 @@ func (n *NPC) Update() error {
 }
 
 func (n *NPC) Talk() []string {
-	return []string{
+	var result = []string{
 		fmt.Sprintf("My name is %s", n.ID),
-		"I hope you like this place",
-		"Good luck!"}
+	}
+	for _, v := range n.Chars.AsPhrases() {
+		result = append(result, v)
+	}
+	return result
 }

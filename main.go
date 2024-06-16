@@ -47,9 +47,15 @@ func main() {
 		ID:       "people",
 		MapScene: people1,
 		NPCs: []*npc.NPC{
-			npcFactory.NewNPC(1, []int{10, 111, 304}, 16*24, 16*6, common.Position{X: 16 * 18, Y: 16 * 6}),
-			npcFactory.NewNPC(271, nil, 16*24, 16*11, common.Position{X: 16 * 17, Y: 16 * 11}),
-			npcFactory.NewNPC(162, []int{389, 476, 312}, 16*26, 16*9, common.Position{X: 16 * 19, Y: 16 * 6}),
+			npcFactory.NewNPC(1, []int{10, 111, 304}, 16*24, 16*6,
+				common.Position{X: 16 * 18, Y: 16 * 6},
+				npc.AddHappyCharacteristics(npc.Sports, npc.Cooking)),
+			npcFactory.NewNPC(271, nil, 16*24, 16*11,
+				common.Position{X: 16 * 17, Y: 16 * 11},
+				npc.AddHappyCharacteristics(npc.Extrovert, npc.Cooking)),
+			npcFactory.NewNPC(162, []int{389, 476, 312}, 16*26, 16*9,
+				common.Position{X: 16 * 19, Y: 16 * 6},
+				npc.AddHappyCharacteristics(npc.Adventurous, npc.Music)),
 		},
 	}
 	town1Scene := &scenes.BaseScene{

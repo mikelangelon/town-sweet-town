@@ -1,7 +1,6 @@
 package scenes
 
 import (
-	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/joelschutz/stagehand"
@@ -79,8 +78,7 @@ func (bs *BaseScene) Update() error {
 		space := resolv.NewSpace(640, 480, 16, 16)
 		player := resolv.NewObject(float64(bs.state.Player.X), float64(bs.state.Player.Y), 16, 16)
 		space.Add(player)
-		for i, v := range bs.NPCs {
-			v.ID = fmt.Sprintf("%d", i)
+		for _, v := range bs.NPCs {
 			npc := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
 			npc.Data = v
 			space.Add(npc)
