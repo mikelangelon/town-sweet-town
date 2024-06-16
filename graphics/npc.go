@@ -28,3 +28,7 @@ func (n *NPC) Update() error {
 	}()
 	return nil
 }
+
+func (n *NPC) Talk() string {
+	return "Welcome<NEXT>I hope you like this place<NEXT>Good luck!"
+}

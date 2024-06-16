@@ -7,6 +7,7 @@ import (
 	"github.com/joelschutz/stagehand"
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
+	"github.com/mikelangelon/town-sweet-town/textbox"
 	"github.com/solarlune/resolv"
 	"image"
 	"time"
@@ -21,6 +22,7 @@ type BaseScene struct {
 	MapScene         *graphics.MapScene
 	NPCs             []*graphics.NPC
 	TransitionPoints Transition
+	Text             textbox.TextBox
 }
 
 func (bs *BaseScene) Layout(w, h int) (int, int) {
@@ -38,9 +40,16 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 	for _, v := range bs.NPCs {
 		v.Draw(screen)
 	}
+	bs.Text.Draw(screen)
 }
 
 func (bs *BaseScene) Update() error {
+	if bs.Text.Visible() {
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			bs.Text.Next()
+		}
+		return nil
+	}
 	for _, v := range bs.NPCs {
 		v.Update()
 	}
@@ -79,11 +88,13 @@ func (bs *BaseScene) Update() error {
 		if collision := player.Check(16, 0); collision != nil {
 			if c, ok := collision.Objects[0].Data.(*graphics.NPC); ok {
 				fmt.Printf("talking to one NPC: %s", c.ID)
+				bs.Text.Show(c.Talk())
 			}
 		}
 		if collision := player.Check(-16, 0); collision != nil {
 			if c, ok := collision.Objects[0].Data.(*graphics.NPC); ok {
 				fmt.Printf("talking to one NPC: %s", c.ID)
+				bs.Text.Show(c.Talk())
 			}
 		}
 	}
