@@ -41,7 +41,7 @@ func (c *TextBox) Update() error {
 		return nil
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		if !c.hasNext() {
+		if !c.hasNext() && len(c.Options) > 0 {
 			answer := c.Options[c.SelectedOption]
 			c.answerFunc(answer)
 			c.selectDefaultAnswer()

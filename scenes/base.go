@@ -21,6 +21,7 @@ type BaseScene struct {
 	ID               string
 	MapScene         *graphics.MapScene
 	NPCs             []*npc.NPC
+	Objects          []*graphics.Char
 	TransitionPoints Transition
 	Text             textbox.TextBox
 }
@@ -38,6 +39,9 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 	bs.MapScene.Draw(screen)
 	bs.state.Player.Draw(screen)
 	for _, v := range bs.NPCs {
+		v.Draw(screen)
+	}
+	for _, v := range bs.Objects {
 		v.Draw(screen)
 	}
 	bs.Text.Draw(screen)
@@ -82,12 +86,17 @@ func (bs *BaseScene) Update() error {
 			npc.Data = v
 			space.Add(npc)
 		}
+		for _, v := range bs.Objects {
+			npc := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
+			npc.Data = v
+			space.Add(npc)
+		}
 
 		if collision := player.Check(16, 0); collision != nil {
-			bs.TalkToNPC(collision)
+			bs.Action(collision)
 		}
 		if collision := player.Check(-16, 0); collision != nil {
-			bs.TalkToNPC(collision)
+			bs.Action(collision)
 		}
 	}
 
@@ -114,44 +123,47 @@ func (bs *BaseScene) Update() error {
 	return nil
 }
 
-func (bs *BaseScene) TalkToNPC(collision *resolv.Collision) {
+func (bs *BaseScene) Action(collision *resolv.Collision) {
 	if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
-		answerFunc := func(answer string) {
-			if answer != textbox.NoResponse {
-				for _, v := range bs.state.World["town1"].Houses {
-					if v.ID == answer {
-						c.House = v
-						v.Owner = &c.ID
-					}
-				}
-				c.Move = &common.Position{X: -16, Y: c.Y}
-				bs.state.World["people"].RemoveNPC(c.ID)
-				bs.state.World["town1"].AddNPC(c)
-			}
-		}
-		var options []string
-		for _, v := range bs.state.World["town1"].Houses {
-			if v.Owner != nil {
-				continue
-			}
-			options = append(options, v.ID)
-		}
-		options = append(options, textbox.NoResponse)
-		bs.Text.ShowAndQuestion(c.Talk(), options, answerFunc)
+		bs.TalkToNPC(c)
+	}
+	if c, ok := collision.Objects[0].Data.(*graphics.Char); ok {
+		bs.ActionToObject(c)
 	}
 }
 
-func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
-	if st.Status == InitialState {
-		st.Status = Playing
-		bs.state = st
-		bs.sm = sm.(*stagehand.SceneManager[State])
-		return
+func (bs *BaseScene) TalkToNPC(npc *npc.NPC) {
+	answerFunc := func(answer string) {
+		if answer != textbox.NoResponse {
+			for _, v := range bs.state.World["town1"].Houses {
+				if v.ID == answer {
+					npc.House = v
+					v.Owner = &npc.ID
+				}
+			}
+			npc.Move = &common.Position{X: -16, Y: npc.Y}
+			bs.state.World["people"].RemoveNPC(npc.ID)
+			bs.state.World["town1"].AddNPC(npc)
+		}
 	}
+	var options []string
+	for _, v := range bs.state.World["town1"].Houses {
+		if v.Owner != nil {
+			continue
+		}
+		options = append(options, v.ID)
+	}
+	options = append(options, textbox.NoResponse)
+	bs.Text.ShowAndQuestion(npc.Talk(), options, answerFunc)
+}
 
+func (bs *BaseScene) ActionToObject(object *graphics.Char) {
+	bs.Text.Show([]string{"going to sleep", "blablabla"})
+}
+
+func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
 	bs.state = st
 	bs.sm = sm.(*stagehand.SceneManager[State])
-
 	for _, v := range bs.state.World[bs.ID].Houses {
 		if v.Owner != nil {
 			npc := bs.state.World[bs.ID].NPCs.GetNPC(*v.Owner)
@@ -161,6 +173,13 @@ func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
 		}
 	}
 	bs.NPCs = bs.state.World[bs.ID].NPCs
+	bs.Objects = bs.state.World[bs.ID].Objects
+
+	if bs.state.Status == InitialState {
+		bs.state.Status = Playing
+		return
+	}
+
 	timer := time.NewTimer(500 * time.Millisecond)
 	go func() {
 		<-timer.C

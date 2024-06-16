@@ -29,6 +29,11 @@ func main() {
 		slog.Error("crash parseTileSet", "error", err)
 		return
 	}
+	fancyTownFactory, err := graphics.NewCharFactory(assets.FancyTown, assets.FancyTownTSX, common.Scale)
+	if err != nil {
+		slog.Error("crash parseTileSet", "error", err)
+		return
+	}
 	npcFactory := npc.NPCFactory{
 		CharFactory: charFactory,
 		Scale:       common.Scale,
@@ -38,7 +43,7 @@ func main() {
 		return
 	}
 	char := charFactory.NewChar(1, []int{10, 111, 304}, 16*6, 16*6)
-
+	fire := fancyTownFactory.NewChar(470, nil, 16*6, 16*10)
 	// set scenes
 	state := scenes.State{
 		Player: char,
@@ -48,6 +53,9 @@ func main() {
 				Houses: []*house.House{
 					{ID: "House 1", Position: common.Position{X: 6 * 16, Y: 6 * 16}},
 					{ID: "House 2", Position: common.Position{X: 17 * 16, Y: 11 * 16}},
+				},
+				Objects: []*graphics.Char{
+					fire,
 				},
 			},
 			"people": {

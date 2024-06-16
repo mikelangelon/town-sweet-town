@@ -29,6 +29,12 @@ var (
 	//go:embed roguelikeChar_transparent.tsx
 	CharactersTSX []byte
 
+	//go:embed roguelikeSheet_transparent.png
+	FancyTown []byte
+
+	//go:embed roguelikeSheet_transparent.tsx
+	FancyTownTSX []byte
+
 	//go:embed holstein-regular.ttf
 	HolsteinFont []byte
 )

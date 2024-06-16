@@ -13,8 +13,9 @@ type State struct {
 }
 
 type SceneMap struct {
-	NPCs   npc.NPCs
-	Houses []*house.House
+	NPCs    npc.NPCs
+	Houses  []*house.House
+	Objects []*graphics.Char
 }
 
 func (s *SceneMap) AddNPC(npc *npc.NPC) {
