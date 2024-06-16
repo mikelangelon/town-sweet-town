@@ -11,7 +11,7 @@ type NPCFactory struct {
 	Scale       int
 }
 
-func (n *NPCFactory) NewNPC(id int, withIDs []int, x, y int64, move common.Position, chs Chars) *NPC {
+func (n *NPCFactory) NewNPC(id int, withIDs []int, x, y int64, move *common.Position, chs Chars) *NPC {
 	return &NPC{
 		Char: graphics.Char{
 			ID:     fake.FirstName(),

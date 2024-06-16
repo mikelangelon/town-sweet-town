@@ -6,8 +6,8 @@ import (
 	"github.com/joelschutz/stagehand"
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
-	"github.com/mikelangelon/town-sweet-town/npc"
 	"github.com/mikelangelon/town-sweet-town/textbox"
+	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
 	"image"
 	"time"
@@ -84,14 +84,10 @@ func (bs *BaseScene) Update() error {
 		}
 
 		if collision := player.Check(16, 0); collision != nil {
-			if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
-				bs.Text.ShowAndQuestion(c, []string{"House 1", "House 2", textbox.NoResponse})
-			}
+			bs.TalkToNPC(collision)
 		}
 		if collision := player.Check(-16, 0); collision != nil {
-			if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
-				bs.Text.ShowAndQuestion(c, []string{"House 1", "House 2", textbox.NoResponse})
-			}
+			bs.TalkToNPC(collision)
 		}
 	}
 
@@ -118,6 +114,33 @@ func (bs *BaseScene) Update() error {
 	return nil
 }
 
+func (bs *BaseScene) TalkToNPC(collision *resolv.Collision) {
+	if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
+		answerFunc := func(answer string) {
+			if answer != textbox.NoResponse {
+				for _, v := range bs.state.World["town1"].Houses {
+					if v.ID == answer {
+						c.House = v
+						v.Owner = &c.ID
+					}
+				}
+				c.Move = &common.Position{X: -16, Y: c.Y}
+				bs.state.World["people"].RemoveNPC(c.ID)
+				bs.state.World["town1"].AddNPC(c)
+			}
+		}
+		var options []string
+		for _, v := range bs.state.World["town1"].Houses {
+			if v.Owner != nil {
+				continue
+			}
+			options = append(options, v.ID)
+		}
+		options = append(options, textbox.NoResponse)
+		bs.Text.ShowAndQuestion(c.Talk(), options, answerFunc)
+	}
+}
+
 func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
 	if st.Status == InitialState {
 		st.Status = Playing
@@ -128,7 +151,16 @@ func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
 
 	bs.state = st
 	bs.sm = sm.(*stagehand.SceneManager[State])
-	bs.NPCs = bs.state.NPCs[bs.ID]
+
+	for _, v := range bs.state.World[bs.ID].Houses {
+		if v.Owner != nil {
+			npc := bs.state.World[bs.ID].NPCs.GetNPC(*v.Owner)
+			npc.X = v.Position.X + 16
+			npc.Y = v.Position.Y + 16
+			npc.Move = nil
+		}
+	}
+	bs.NPCs = bs.state.World[bs.ID].NPCs
 	timer := time.NewTimer(500 * time.Millisecond)
 	go func() {
 		<-timer.C

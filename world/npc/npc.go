@@ -4,26 +4,29 @@ import (
 	"fmt"
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
+	"github.com/mikelangelon/town-sweet-town/world/house"
 	"time"
 )
 
 type NPC struct {
 	graphics.Char
-	Move    common.Position
+	Move    *common.Position
 	moving  bool
 	Phrases []string
 	Chars   Chars
-	HouseID *string
+	House   *house.House
 }
 
 func (n *NPC) Update() error {
-	if n.moving {
+	if n.moving || n.Move == nil {
 		return nil
 	}
 	if n.Char.X < n.Move.X {
 		n.Char.X += 16
 	} else if n.Char.X > n.Move.X {
 		n.Char.X -= 16
+	} else {
+		n.Move = nil
 	}
 	n.moving = true
 	timer := time.NewTimer(400 * time.Millisecond)
@@ -41,7 +44,7 @@ func (n *NPC) Talk() []string {
 	for _, v := range n.Chars.AsPhrases() {
 		result = append(result, v)
 	}
-	if n.HouseID == nil {
+	if n.House == nil {
 		result = append(result, "Could I live in one house, please?")
 	}
 	return result

@@ -2,13 +2,33 @@ package scenes
 
 import (
 	"github.com/mikelangelon/town-sweet-town/graphics"
-	"github.com/mikelangelon/town-sweet-town/npc"
+	"github.com/mikelangelon/town-sweet-town/world/house"
+	"github.com/mikelangelon/town-sweet-town/world/npc"
 )
 
 type State struct {
 	Player *graphics.Char
 	Status int
-	NPCs   map[string][]*npc.NPC
+	World  map[string]*SceneMap
+}
+
+type SceneMap struct {
+	NPCs   npc.NPCs
+	Houses []*house.House
+}
+
+func (s *SceneMap) AddNPC(npc *npc.NPC) {
+	s.NPCs = append(s.NPCs, npc)
+}
+func (s *SceneMap) RemoveNPC(ID string) {
+	var npcs []*npc.NPC
+	for _, v := range s.NPCs {
+		if v.ID == ID {
+			continue
+		}
+		npcs = append(npcs, v)
+	}
+	s.NPCs = npcs
 }
 
 const (

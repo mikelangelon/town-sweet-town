@@ -6,8 +6,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	text "github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/mikelangelon/town-sweet-town/assets"
-	"github.com/mikelangelon/town-sweet-town/common"
-	"github.com/mikelangelon/town-sweet-town/npc"
 	"image/color"
 	"strings"
 )
@@ -28,7 +26,7 @@ type TextBox struct {
 
 	Options        []string
 	SelectedOption int
-	NPC            *npc.NPC
+	answerFunc     func(answer string)
 }
 
 const (
@@ -45,10 +43,7 @@ func (c *TextBox) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		if !c.hasNext() {
 			answer := c.Options[c.SelectedOption]
-			if answer != NoResponse {
-				c.NPC.HouseID = &answer
-				c.NPC.Move = common.Position{X: -16, Y: c.NPC.Y}
-			}
+			c.answerFunc(answer)
 			c.selectDefaultAnswer()
 		}
 		c.Next()
@@ -132,10 +127,10 @@ func (c *TextBox) Show(text []string) {
 	c.next = text[1:]
 }
 
-func (c *TextBox) ShowAndQuestion(npc *npc.NPC, options []string) {
-	c.Show(npc.Talk())
+func (c *TextBox) ShowAndQuestion(text []string, options []string, answerFunc func(string)) {
+	c.Show(text)
 	c.Options = options
-	c.NPC = npc
+	c.answerFunc = answerFunc
 	c.selectDefaultAnswer()
 }
 
