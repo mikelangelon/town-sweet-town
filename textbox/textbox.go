@@ -15,14 +15,14 @@ type TextBox struct {
 	visible  bool
 	text     string
 	nextText *string
+	next     []string
 }
 
 const (
-	boxX          float64 = 100
-	boxY          float64 = 400
-	boxW          int     = 500
-	boxH          int     = 150
-	nextSeparator         = "<NEXT>"
+	boxX float64 = 100
+	boxY float64 = 400
+	boxW int     = 500
+	boxH int     = 150
 )
 
 func (c *TextBox) Draw(screen *ebiten.Image) {
@@ -61,22 +61,20 @@ func (c *TextBox) Visible() bool {
 }
 
 func (c *TextBox) Next() {
-	if c.nextText != nil {
-		c.Show(*c.nextText)
+	if len(c.next) > 0 {
+		c.Show(c.next)
 		return
 	}
 	c.visible = false
 }
 
-func (c *TextBox) Show(text string) {
-	c.visible = true
-	before, after, found := strings.Cut(text, nextSeparator)
-	c.text = before
-	if found {
-		c.nextText = &after
-	} else {
-		c.nextText = nil
+func (c *TextBox) Show(text []string) {
+	if len(text) == 0 {
+		return
 	}
+	c.visible = true
+	c.text = text[0]
+	c.next = text[1:]
 }
 
 func guiFont(size float64) *text.GoTextFace {

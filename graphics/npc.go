@@ -7,8 +7,9 @@ import (
 
 type NPC struct {
 	Char
-	Move   common.Position
-	moving bool
+	Move    common.Position
+	moving  bool
+	Phrases []string
 }
 
 func (n *NPC) Update() error {
@@ -29,6 +30,6 @@ func (n *NPC) Update() error {
 	return nil
 }
 
-func (n *NPC) Talk() string {
-	return "Welcome<NEXT>I hope you like this place<NEXT>Good luck!"
+func (n *NPC) Talk() []string {
+	return []string{"Welcome", "I hope you like this place", "Good luck!"}
 }
