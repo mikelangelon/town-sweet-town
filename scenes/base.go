@@ -1,6 +1,9 @@
 package scenes
 
 import (
+	"github.com/ebitenui/ebitenui"
+	imageNine "github.com/ebitenui/ebitenui/image"
+	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/joelschutz/stagehand"
@@ -16,17 +19,23 @@ import (
 
 type BaseScene struct {
 	bounds image.Rectangle
-	state  State
-	sm     *stagehand.SceneManager[State]
+	// state & management
+	state State
+	sm    *stagehand.SceneManager[State]
 
-	ID               string
-	MapScene         *graphics.MapScene
-	NPCs             []*npc.NPC
-	Objects          []*graphics.Char
+	// World related
+	ID       string
+	MapScene *graphics.MapScene
+	NPCs     []*npc.NPC
+	Objects  []*graphics.Char
+
+	// Between scenes
 	TransitionPoints Transition
-	Text             textbox.TextBox
+	TransitionSleep  uint8
 
-	TransitionSleep uint8
+	//UI
+	Text textbox.TextBox
+	ui   *ebitenui.UI
 }
 
 func (bs *BaseScene) Layout(w, h int) (int, int) {
@@ -59,12 +68,22 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 		bg.Fill(colorGoal)
 		screen.DrawImage(bg, op)
 	}
+	if bs.ui != nil {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(500, 0)
+		bg := ebiten.NewImage(300, 50)
+		bs.ui.Draw(bg)
+		screen.DrawImage(bg, op)
+	}
 }
 
 func (bs *BaseScene) Update() error {
 	if bs.Text.Visible() {
 		bs.Text.Update()
 		return nil
+	}
+	if bs.ui != nil {
+		bs.ui.Update()
 	}
 	if bs.state.Status != Playing {
 		return nil
@@ -207,4 +226,72 @@ func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
 		<-timer.C
 		bs.state.Player.X, bs.state.Player.Y = bs.TransitionPoints.Position.X, bs.TransitionPoints.Position.Y
 	}()
+}
+
+func (bs *BaseScene) SetupUI() {
+	rootContainer := widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
+	)
+	// Construct a container to hold the progress bars.
+	progressBarsContainer := widget.NewContainer(
+		// The container will use a vertical row layout to lay out the progress
+		// bars in a vertical row.
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Spacing(20),
+		)),
+		// Set the required anchor layout data to determine where in the root
+		// container to place the progress bars.
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				HorizontalPosition: widget.AnchorLayoutPositionCenter,
+				VerticalPosition:   widget.AnchorLayoutPositionCenter,
+			}),
+		),
+	)
+
+	// Construct a horizontal progress bar.
+	hProgressbar := widget.NewProgressBar(
+		widget.ProgressBarOpts.WidgetOpts(
+			// Set the minimum size for the progress bar.
+			// This is necessary if you wish to have the progress bar be larger than
+			// the provided track image. In this exampe since we are using NineSliceColor
+			// which is 1px x 1px we must set a minimum size.
+			widget.WidgetOpts.MinSize(200, 20),
+		),
+		widget.ProgressBarOpts.Images(
+			// Set the track images (Idle, Disabled).
+			&widget.ProgressBarImage{
+				Idle: imageNine.NewNineSliceColor(color.NRGBA{100, 100, 100, 255}),
+			},
+			// Set the progress images (Idle, Disabled).
+			&widget.ProgressBarImage{
+				Idle: imageNine.NewNineSliceColor(color.NRGBA{0, 0, 255, 255}),
+			},
+		),
+		// Set the min, max, and current values.
+		widget.ProgressBarOpts.Values(0, 10, 7),
+		// Set how much of the track is displayed when the bar is overlayed.
+		widget.ProgressBarOpts.TrackPadding(widget.Insets{
+			Top:    2,
+			Bottom: 2,
+		}),
+	)
+
+	/*
+		To update a progress bar programmatically you can use
+		hProgressbar.SetCurrent(value)
+		hProgressbar.GetCurrent()
+		hProgressbar.Min = 5
+		hProgressbar.Max = 10
+	*/
+	// Add the progress bars as a child of their container.
+	progressBarsContainer.AddChild(hProgressbar)
+	rootContainer.AddChild(progressBarsContainer)
+
+	// construct the UI
+	ui := ebitenui.UI{
+		Container: rootContainer,
+	}
+	bs.ui = &ui
 }

@@ -3,6 +3,7 @@ module github.com/mikelangelon/town-sweet-town
 go 1.22.3
 
 require (
+	github.com/ebitenui/ebitenui v0.5.7
 	github.com/hajimehoshi/ebiten/v2 v2.7.5
 	github.com/icrowley/fake v0.0.0-20221112152111-d7b7e2276db2
 	github.com/joelschutz/stagehand v1.1.1
@@ -16,8 +17,9 @@ require (
 	github.com/ebitengine/purego v0.7.1 // indirect
 	github.com/go-text/typesetting v0.1.1-0.20240325125605-c7936fe59984 // indirect
 	github.com/jezek/xgb v1.1.1 // indirect
-	golang.org/x/image v0.16.0 // indirect
+	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
+	golang.org/x/image v0.17.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 )

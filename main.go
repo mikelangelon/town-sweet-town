@@ -81,6 +81,7 @@ func main() {
 		ID:       "town1",
 		MapScene: town1,
 	}
+	town1Scene.SetupUI()
 	town1Scene.TransitionPoints = scenes.Transition{
 		Position:  common.Position{X: 24 * 16, Y: 6 * 16},
 		Scene:     people1Scene,
