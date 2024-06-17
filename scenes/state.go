@@ -37,4 +37,5 @@ const (
 	InitialState
 	Playing
 	Transitioning
+	DayEnding
 )

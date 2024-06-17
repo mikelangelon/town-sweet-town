@@ -15,7 +15,10 @@ var (
 	selectedColor   = color.RGBA{150, 150, 150, 150}
 )
 
-const NoResponse = "None"
+const (
+	NoResponse = "None"
+	No         = "No"
+)
 
 type TextBox struct {
 	visible  bool

@@ -10,6 +10,7 @@ import (
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
 	"image"
+	"image/color"
 	"time"
 )
 
@@ -24,6 +25,8 @@ type BaseScene struct {
 	Objects          []*graphics.Char
 	TransitionPoints Transition
 	Text             textbox.TextBox
+
+	TransitionSleep uint8
 }
 
 func (bs *BaseScene) Layout(w, h int) (int, int) {
@@ -45,6 +48,17 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 		v.Draw(screen)
 	}
 	bs.Text.Draw(screen)
+	if bs.state.Status == DayEnding {
+		colorGoal := color.RGBA{10, 10, 10, bs.TransitionSleep}
+		if bs.TransitionSleep < 200 {
+			bs.TransitionSleep++
+		}
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(0, 0)
+		bg := ebiten.NewImage(common.ScreenWidth, common.ScreenHeight)
+		bg.Fill(colorGoal)
+		screen.DrawImage(bg, op)
+	}
 }
 
 func (bs *BaseScene) Update() error {
@@ -52,7 +66,9 @@ func (bs *BaseScene) Update() error {
 		bs.Text.Update()
 		return nil
 	}
-
+	if bs.state.Status != Playing {
+		return nil
+	}
 	for _, v := range bs.NPCs {
 		v.Update()
 	}
@@ -134,7 +150,7 @@ func (bs *BaseScene) Action(collision *resolv.Collision) {
 
 func (bs *BaseScene) TalkToNPC(npc *npc.NPC) {
 	answerFunc := func(answer string) {
-		if answer != textbox.NoResponse {
+		if answer != textbox.NoResponse && answer != textbox.No {
 			for _, v := range bs.state.World["town1"].Houses {
 				if v.ID == answer {
 					npc.House = v
@@ -158,7 +174,13 @@ func (bs *BaseScene) TalkToNPC(npc *npc.NPC) {
 }
 
 func (bs *BaseScene) ActionToObject(object *graphics.Char) {
-	bs.Text.Show([]string{"going to sleep", "blablabla"})
+	bs.Text.ShowAndQuestion(
+		[]string{"Go to the next day?"},
+		[]string{"Yes", textbox.No},
+		func(answer string) {
+			bs.state.Status = DayEnding
+		},
+	)
 }
 
 func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
