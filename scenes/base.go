@@ -4,6 +4,7 @@ import (
 	"github.com/ebitenui/ebitenui"
 	imageNine "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/joelschutz/stagehand"
@@ -12,6 +13,8 @@ import (
 	"github.com/mikelangelon/town-sweet-town/textbox"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/gofont/goregular"
 	"image"
 	"image/color"
 	"time"
@@ -34,8 +37,9 @@ type BaseScene struct {
 	TransitionSleep  uint8
 
 	//UI
-	Text textbox.TextBox
-	ui   *ebitenui.UI
+	Text     textbox.TextBox
+	ui       *ebitenui.UI
+	endOfDay *ebitenui.UI
 }
 
 func (bs *BaseScene) Layout(w, h int) (int, int) {
@@ -61,6 +65,10 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 		colorGoal := color.RGBA{10, 10, 10, bs.TransitionSleep}
 		if bs.TransitionSleep < 200 {
 			bs.TransitionSleep++
+		} else {
+			if bs.endOfDay == nil {
+				bs.ShowEndOfDay()
+			}
 		}
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(0, 0)
@@ -73,6 +81,13 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(500, 0)
 		bg := ebiten.NewImage(300, 50)
 		bs.ui.Draw(bg)
+		screen.DrawImage(bg, op)
+	}
+	if bs.endOfDay != nil {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(50, 150)
+		bg := ebiten.NewImage(500, 300)
+		bs.endOfDay.Draw(bg)
 		screen.DrawImage(bg, op)
 	}
 }
@@ -294,4 +309,88 @@ func (bs *BaseScene) SetupUI() {
 		Container: rootContainer,
 	}
 	bs.ui = &ui
+}
+
+func (bs *BaseScene) ShowEndOfDay() {
+	rootContainer := widget.NewContainer(
+		widget.ContainerOpts.BackgroundImage(imageNine.NewNineSliceColor(color.NRGBA{0x13, 0x1a, 0x22, 100})),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(20)),
+			widget.RowLayoutOpts.Spacing(20),
+		)),
+	)
+
+	secondaryContainer := widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
+			widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)),
+			widget.RowLayoutOpts.Spacing(10),
+		)),
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Position: widget.RowLayoutPositionCenter,
+			}),
+		),
+	)
+
+	leftContainer := widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)),
+			widget.RowLayoutOpts.Spacing(10),
+		)),
+	)
+
+	rightContainer := widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)),
+			widget.RowLayoutOpts.Spacing(10),
+		)),
+	)
+
+	// construct the UI
+	ui := ebitenui.UI{
+		Container: rootContainer,
+	}
+	face, _ := loadFont(20)
+	label1 := widget.NewText(
+		widget.TextOpts.Text("Day 1 - Results", face, color.White),
+	)
+	label2 := widget.NewText(
+		widget.TextOpts.Text("Rent: 10 euros", face, color.White),
+	)
+	label3 := widget.NewText(
+		widget.TextOpts.Text("Happiness: 10", face, color.White),
+	)
+	label4 := widget.NewText(
+		widget.TextOpts.Text("Security: 10", face, color.White),
+	)
+	label5 := widget.NewText(
+		widget.TextOpts.Text("Cultural: 10", face, color.White),
+	)
+	rootContainer.AddChild(label1)
+	rootContainer.AddChild(secondaryContainer)
+	secondaryContainer.AddChild(leftContainer)
+	secondaryContainer.AddChild(rightContainer)
+	leftContainer.AddChild(label2)
+	leftContainer.AddChild(label4)
+	leftContainer.AddChild(label5)
+	rightContainer.AddChild(label3)
+
+	bs.endOfDay = &ui
+}
+
+func loadFont(size float64) (font.Face, error) {
+	ttfFont, err := truetype.Parse(goregular.TTF)
+	if err != nil {
+		return nil, err
+	}
+
+	return truetype.NewFace(ttfFont, &truetype.Options{
+		Size:    size,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	}), nil
 }
