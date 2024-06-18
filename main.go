@@ -62,10 +62,10 @@ func main() {
 				NPCs: []*npc.NPC{
 					npcFactory.NewNPC(1, []int{10, 111, 304}, 16*30, 16*6,
 						&common.Position{X: 16 * 18, Y: 16 * 6},
-						npc.AddHappyCharacteristics(npc.Sports, npc.Cooking)),
+						npc.AddHappyCharacteristics(npc.Sports, npc.Cooking, npc.Animals)),
 					npcFactory.NewNPC(271, nil, 16*28, 16*11,
 						&common.Position{X: 16 * 17, Y: 16 * 11},
-						npc.AddHappyCharacteristics(npc.Extrovert, npc.Cooking)),
+						npc.AddHappyCharacteristics(npc.Extrovert, npc.Cooking, npc.Animals, npc.Reading)),
 					npcFactory.NewNPC(162, []int{389, 476, 312}, 16*31, 16*9,
 						&common.Position{X: 16 * 19, Y: 16 * 6},
 						npc.AddHappyCharacteristics(npc.Adventurous, npc.Music)),

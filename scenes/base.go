@@ -312,6 +312,16 @@ func (bs *BaseScene) SetupUI() {
 }
 
 func (bs *BaseScene) ShowEndOfDay() {
+
+	var total npc.Stats
+	var allChars []npc.Chars
+	for _, v := range bs.NPCs {
+		total = total.Merge(v.Chars.Stats())
+		allChars = append(allChars, v.Chars)
+	}
+	happiness := npc.CheckHappiness(allChars)
+	total.Happiness += happiness
+
 	rootContainer := widget.NewContainer(
 		widget.ContainerOpts.BackgroundImage(imageNine.NewNineSliceColor(color.NRGBA{0x13, 0x1a, 0x22, 100})),
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
@@ -358,76 +368,69 @@ func (bs *BaseScene) ShowEndOfDay() {
 	label1 := widget.NewText(
 		widget.TextOpts.Text("Day 1 - Results", face, color.White),
 	)
-	label2 := widget.NewText(
+	lRent := widget.NewText(
 		widget.TextOpts.Text("Rent: 10 euros", face, color.White),
 	)
-	food := widget.NewText(
+	lFood := widget.NewText(
 		widget.TextOpts.Text("Food: 10", face, color.White),
 	)
-	label3 := widget.NewText(
+	lHappiness := widget.NewText(
 		widget.TextOpts.Text("Happiness", face, color.White),
 	)
 	labelHealth := widget.NewText(
 		widget.TextOpts.Text("Health", face, color.White),
 	)
-	label4 := widget.NewText(
+	lSecurity := widget.NewText(
 		widget.TextOpts.Text("Security", face, color.White),
 	)
-	label5 := widget.NewText(
+	lCultural := widget.NewText(
 		widget.TextOpts.Text("Cultural", face, color.White),
 	)
 	currentStuff := widget.NewText(
 		widget.TextOpts.Text("House 1 - Nice upgrade", face, color.White),
 	)
 
-	hProgressbar := widget.NewProgressBar(
-		widget.ProgressBarOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(100, 10),
-		),
-		widget.ProgressBarOpts.Images(
-			&widget.ProgressBarImage{
-				Idle: imageNine.NewNineSliceColor(color.NRGBA{100, 100, 100, 255}),
-			},
-			&widget.ProgressBarImage{
-				Idle: imageNine.NewNineSliceColor(color.NRGBA{0, 0, 255, 255}),
-			},
-		),
-		widget.ProgressBarOpts.Values(0, 10, 7),
-	)
-	hProgressbar2 := widget.NewProgressBar(
-		widget.ProgressBarOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(100, 10),
-		),
-		widget.ProgressBarOpts.Images(
-			&widget.ProgressBarImage{
-				Idle: imageNine.NewNineSliceColor(color.NRGBA{100, 100, 100, 255}),
-			},
-			&widget.ProgressBarImage{
-				Idle: imageNine.NewNineSliceColor(color.NRGBA{0, 0, 255, 255}),
-			},
-		),
-		widget.ProgressBarOpts.Values(0, 10, 7),
-	)
-
 	rootContainer.AddChild(label1)
 	rootContainer.AddChild(secondaryContainer)
 	secondaryContainer.AddChild(leftContainer)
 	secondaryContainer.AddChild(rightContainer)
-	leftContainer.AddChild(label2)
-	leftContainer.AddChild(label4)
-	leftContainer.AddChild(hProgressbar2)
-	leftContainer.AddChild(label5)
-	leftContainer.AddChild(hProgressbar)
-	rightContainer.AddChild(food)
-	rightContainer.AddChild(label3)
-	rightContainer.AddChild(hProgressbar2)
+	leftContainer.AddChild(lRent)
+	leftContainer.AddChild(lSecurity)
+	leftContainer.AddChild(progress(total.Security))
+	leftContainer.AddChild(lCultural)
+	leftContainer.AddChild(progress(total.Cultural))
+	rightContainer.AddChild(lFood)
+	rightContainer.AddChild(lHappiness)
+	rightContainer.AddChild(progress(total.Happiness))
 	rightContainer.AddChild(labelHealth)
-	rightContainer.AddChild(hProgressbar)
+	rightContainer.AddChild(progress(total.Health))
 	rootContainer.AddChild(currentStuff)
 
 	bs.endOfDay = &ui
 }
 
+func (bs *BaseScene) calculateDay() {
+	// TODO Calculate town security
+	//
+
+}
+
+func progress(current int) *widget.ProgressBar {
+	return widget.NewProgressBar(
+		widget.ProgressBarOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(100, 10),
+		),
+		widget.ProgressBarOpts.Images(
+			&widget.ProgressBarImage{
+				Idle: imageNine.NewNineSliceColor(color.NRGBA{100, 100, 100, 255}),
+			},
+			&widget.ProgressBarImage{
+				Idle: imageNine.NewNineSliceColor(color.NRGBA{0, 0, 255, 255}),
+			},
+		),
+		widget.ProgressBarOpts.Values(0, 100, current),
+	)
+}
 func loadFont(size float64) (font.Face, error) {
 	ttfFont, err := truetype.Parse(goregular.TTF)
 	if err != nil {
