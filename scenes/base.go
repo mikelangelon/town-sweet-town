@@ -361,23 +361,69 @@ func (bs *BaseScene) ShowEndOfDay() {
 	label2 := widget.NewText(
 		widget.TextOpts.Text("Rent: 10 euros", face, color.White),
 	)
+	food := widget.NewText(
+		widget.TextOpts.Text("Food: 10", face, color.White),
+	)
 	label3 := widget.NewText(
-		widget.TextOpts.Text("Happiness: 10", face, color.White),
+		widget.TextOpts.Text("Happiness", face, color.White),
+	)
+	labelHealth := widget.NewText(
+		widget.TextOpts.Text("Health", face, color.White),
 	)
 	label4 := widget.NewText(
-		widget.TextOpts.Text("Security: 10", face, color.White),
+		widget.TextOpts.Text("Security", face, color.White),
 	)
 	label5 := widget.NewText(
-		widget.TextOpts.Text("Cultural: 10", face, color.White),
+		widget.TextOpts.Text("Cultural", face, color.White),
 	)
+	currentStuff := widget.NewText(
+		widget.TextOpts.Text("House 1 - Nice upgrade", face, color.White),
+	)
+
+	hProgressbar := widget.NewProgressBar(
+		widget.ProgressBarOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(100, 10),
+		),
+		widget.ProgressBarOpts.Images(
+			&widget.ProgressBarImage{
+				Idle: imageNine.NewNineSliceColor(color.NRGBA{100, 100, 100, 255}),
+			},
+			&widget.ProgressBarImage{
+				Idle: imageNine.NewNineSliceColor(color.NRGBA{0, 0, 255, 255}),
+			},
+		),
+		widget.ProgressBarOpts.Values(0, 10, 7),
+	)
+	hProgressbar2 := widget.NewProgressBar(
+		widget.ProgressBarOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(100, 10),
+		),
+		widget.ProgressBarOpts.Images(
+			&widget.ProgressBarImage{
+				Idle: imageNine.NewNineSliceColor(color.NRGBA{100, 100, 100, 255}),
+			},
+			&widget.ProgressBarImage{
+				Idle: imageNine.NewNineSliceColor(color.NRGBA{0, 0, 255, 255}),
+			},
+		),
+		widget.ProgressBarOpts.Values(0, 10, 7),
+	)
+
 	rootContainer.AddChild(label1)
 	rootContainer.AddChild(secondaryContainer)
 	secondaryContainer.AddChild(leftContainer)
 	secondaryContainer.AddChild(rightContainer)
 	leftContainer.AddChild(label2)
 	leftContainer.AddChild(label4)
+	leftContainer.AddChild(hProgressbar2)
 	leftContainer.AddChild(label5)
+	leftContainer.AddChild(hProgressbar)
+	rightContainer.AddChild(food)
 	rightContainer.AddChild(label3)
+	rightContainer.AddChild(hProgressbar2)
+	rightContainer.AddChild(labelHealth)
+	rightContainer.AddChild(hProgressbar)
+	rootContainer.AddChild(currentStuff)
 
 	bs.endOfDay = &ui
 }
