@@ -29,7 +29,7 @@ type BaseScene struct {
 	// World related
 	ID       string
 	MapScene *graphics.MapScene
-	NPCs     []*npc.NPC
+	NPCs     npc.NPCs
 	Objects  []*graphics.Char
 
 	// Between scenes
@@ -39,7 +39,7 @@ type BaseScene struct {
 	//UI
 	Text     textbox.TextBox
 	ui       *ebitenui.UI
-	endOfDay *ebitenui.UI
+	endOfDay *endOfDay
 }
 
 func (bs *BaseScene) Layout(w, h int) (int, int) {
@@ -67,7 +67,7 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 			bs.TransitionSleep++
 		} else {
 			if bs.endOfDay == nil {
-				bs.ShowEndOfDay()
+				bs.endOfDay = createShowEndOfDay(bs.NPCs)
 			}
 		}
 		op := &ebiten.DrawImageOptions{}
@@ -87,12 +87,13 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(50, 150)
 		bg := ebiten.NewImage(500, 300)
-		bs.endOfDay.Draw(bg)
+		bs.endOfDay.ui.Draw(bg)
 		screen.DrawImage(bg, op)
 	}
 }
 
 func (bs *BaseScene) Update() error {
+	bs.endOfDay.Update()
 	if bs.Text.Visible() {
 		bs.Text.Update()
 		return nil
@@ -309,104 +310,6 @@ func (bs *BaseScene) SetupUI() {
 		Container: rootContainer,
 	}
 	bs.ui = &ui
-}
-
-func (bs *BaseScene) ShowEndOfDay() {
-
-	var total npc.Stats
-	var allChars []npc.Chars
-	for _, v := range bs.NPCs {
-		total = total.Merge(v.Chars.Stats())
-		allChars = append(allChars, v.Chars)
-	}
-	happiness := npc.CheckHappiness(allChars)
-	total.Happiness += happiness
-
-	rootContainer := widget.NewContainer(
-		widget.ContainerOpts.BackgroundImage(imageNine.NewNineSliceColor(color.NRGBA{0x13, 0x1a, 0x22, 100})),
-		widget.ContainerOpts.Layout(widget.NewRowLayout(
-			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-			widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(20)),
-			widget.RowLayoutOpts.Spacing(20),
-		)),
-	)
-
-	secondaryContainer := widget.NewContainer(
-		widget.ContainerOpts.Layout(widget.NewRowLayout(
-			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
-			widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)),
-			widget.RowLayoutOpts.Spacing(10),
-		)),
-		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-				Position: widget.RowLayoutPositionCenter,
-			}),
-		),
-	)
-
-	leftContainer := widget.NewContainer(
-		widget.ContainerOpts.Layout(widget.NewRowLayout(
-			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-			widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)),
-			widget.RowLayoutOpts.Spacing(10),
-		)),
-	)
-
-	rightContainer := widget.NewContainer(
-		widget.ContainerOpts.Layout(widget.NewRowLayout(
-			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-			widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)),
-			widget.RowLayoutOpts.Spacing(10),
-		)),
-	)
-
-	// construct the UI
-	ui := ebitenui.UI{
-		Container: rootContainer,
-	}
-	face, _ := loadFont(20)
-	label1 := widget.NewText(
-		widget.TextOpts.Text("Day 1 - Results", face, color.White),
-	)
-	lRent := widget.NewText(
-		widget.TextOpts.Text("Rent: 10 euros", face, color.White),
-	)
-	lFood := widget.NewText(
-		widget.TextOpts.Text("Food: 10", face, color.White),
-	)
-	lHappiness := widget.NewText(
-		widget.TextOpts.Text("Happiness", face, color.White),
-	)
-	labelHealth := widget.NewText(
-		widget.TextOpts.Text("Health", face, color.White),
-	)
-	lSecurity := widget.NewText(
-		widget.TextOpts.Text("Security", face, color.White),
-	)
-	lCultural := widget.NewText(
-		widget.TextOpts.Text("Cultural", face, color.White),
-	)
-	currentStuff := widget.NewText(
-		widget.TextOpts.Text("House 1 - Nice upgrade", face, color.White),
-	)
-
-	rootContainer.AddChild(label1)
-	rootContainer.AddChild(secondaryContainer)
-	secondaryContainer.AddChild(leftContainer)
-	secondaryContainer.AddChild(rightContainer)
-	leftContainer.AddChild(lRent)
-	leftContainer.AddChild(lSecurity)
-	leftContainer.AddChild(progress(total.Security))
-	leftContainer.AddChild(lCultural)
-	leftContainer.AddChild(progress(total.Cultural))
-	rightContainer.AddChild(lFood)
-	rightContainer.AddChild(lHappiness)
-	rightContainer.AddChild(progress(total.Happiness))
-	rightContainer.AddChild(labelHealth)
-	rightContainer.AddChild(progress(total.Health))
-	rootContainer.AddChild(currentStuff)
-
-	bs.endOfDay = &ui
 }
 
 func (bs *BaseScene) calculateDay() {

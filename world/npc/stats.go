@@ -17,3 +17,14 @@ func (s1 Stats) Merge(s2 Stats) Stats {
 		Health:    s1.Health + s2.Health,
 	}
 }
+
+type Stat struct {
+	name  string
+	steps []StatStep
+}
+
+type StatStep struct {
+	Name  string
+	Value int
+	Text  string
+}
