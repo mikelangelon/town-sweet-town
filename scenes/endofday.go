@@ -30,14 +30,14 @@ func (e *endOfDay) Update() {
 		if e.endOfDayIndex < len(e.endOfDaySteps) {
 			t := time.Now()
 			e.endOfDayTimer = &t
-			fmt.Println(e.endOfDaySteps[e.endOfDayIndex].Text)
-			e.currentStuff.Label = e.endOfDaySteps[e.endOfDayIndex].Text
+			fmt.Println(e.endOfDaySteps[e.endOfDayIndex].FormatText())
+			e.currentStuff.Label = e.endOfDaySteps[e.endOfDayIndex].FormatText()
 			name := e.endOfDaySteps[e.endOfDayIndex].Name
 			e.stats[name] += e.endOfDaySteps[e.endOfDayIndex].Value
 			switch name {
-			case "security", "health", "cultural", "happiness":
+			case npc.Security, npc.Health, npc.Cultural, npc.Happiness:
 				e.mapProgress[name].SetCurrent(e.stats[name])
-			case "rent", "food":
+			case npc.Rent, npc.Food:
 				e.mapStats[name].Label = fmt.Sprintf("Food: %d", e.stats[name])
 			}
 			e.endOfDayIndex++
@@ -51,13 +51,6 @@ func createShowEndOfDay(npcs npc.NPCs) *endOfDay {
 
 	var e endOfDay
 	var total npc.Stats
-	//var allChars []npc.Chars
-	//for _, v := range bs.NPCs {
-	//	total = total.Merge(v.Chars.Stats())
-	//	allChars = append(allChars, v.Chars)
-	//}
-	//happiness := npc.CheckHappiness(allChars)
-	//total.Happiness += happiness
 	e.endOfDaySteps = npcs.AllSteps()
 	t := time.Now()
 	e.endOfDayTimer = &t
@@ -115,7 +108,7 @@ func createShowEndOfDay(npcs npc.NPCs) *endOfDay {
 	e.mapStats = make(map[string]*widget.Text)
 	e.mapProgress = make(map[string]*widget.ProgressBar)
 
-	e.mapStats["food"] = widget.NewText(
+	e.mapStats[npc.Food] = widget.NewText(
 		widget.TextOpts.Text("Food: 0", face, color.White),
 	)
 	lHappiness := widget.NewText(
@@ -134,24 +127,24 @@ func createShowEndOfDay(npcs npc.NPCs) *endOfDay {
 		widget.TextOpts.Text("...", face, color.White),
 	)
 
-	e.mapProgress["security"] = progress(total.Security)
-	e.mapProgress["happiness"] = progress(total.Happiness)
-	e.mapProgress["health"] = progress(total.Health)
-	e.mapProgress["cultural"] = progress(total.Cultural)
+	e.mapProgress[npc.Security] = progress(total.Security)
+	e.mapProgress[npc.Happiness] = progress(total.Happiness)
+	e.mapProgress[npc.Health] = progress(total.Health)
+	e.mapProgress[npc.Cultural] = progress(total.Cultural)
 	rootContainer.AddChild(label1)
 	rootContainer.AddChild(secondaryContainer)
 	secondaryContainer.AddChild(leftContainer)
 	secondaryContainer.AddChild(rightContainer)
 	leftContainer.AddChild(lRent)
 	leftContainer.AddChild(lSecurity)
-	leftContainer.AddChild(e.mapProgress["security"])
+	leftContainer.AddChild(e.mapProgress[npc.Security])
 	leftContainer.AddChild(lCultural)
-	leftContainer.AddChild(e.mapProgress["cultural"])
-	rightContainer.AddChild(e.mapStats["food"])
+	leftContainer.AddChild(e.mapProgress[npc.Cultural])
+	rightContainer.AddChild(e.mapStats[npc.Food])
 	rightContainer.AddChild(lHappiness)
-	rightContainer.AddChild(e.mapProgress["happiness"])
+	rightContainer.AddChild(e.mapProgress[npc.Happiness])
 	rightContainer.AddChild(labelHealth)
-	rightContainer.AddChild(e.mapProgress["health"])
+	rightContainer.AddChild(e.mapProgress[npc.Health])
 	rootContainer.AddChild(e.currentStuff)
 
 	e.ui = &ui

@@ -1,5 +1,19 @@
 package npc
 
+import (
+	"fmt"
+	"strings"
+)
+
+const (
+	Happiness = "happiness"
+	Cultural  = "cultural"
+	Health    = "health"
+	Security  = "security"
+	Food      = "food"
+	Rent      = "rent"
+)
+
 type Stats struct {
 	Happiness int
 	Security  int
@@ -24,7 +38,19 @@ type Stat struct {
 }
 
 type StatStep struct {
-	Name  string
-	Value int
-	Text  string
+	Name   string
+	CharID *string
+	Value  int
+	Text   string
+}
+
+func (s StatStep) FormatText() string {
+	return fmt.Sprintf("%s%s--> %s: %d", strings.ToUpper(s.Name), s.FormatCharID(), s.Text, s.Value)
+}
+
+func (s StatStep) FormatCharID() string {
+	if s.CharID == nil {
+		return ""
+	}
+	return fmt.Sprintf(" %s ", *s.CharID)
 }
