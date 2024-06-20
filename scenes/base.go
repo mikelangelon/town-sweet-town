@@ -67,8 +67,22 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 			bs.TransitionSleep++
 		} else {
 			if bs.endOfDay == nil {
-				bs.endOfDay = createShowEndOfDay(bs.NPCs)
+				bs.endOfDay = createShowEndOfDay(bs.NPCs, bs.state.Day, bs.state.Stats)
 			}
+		}
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(0, 0)
+		bg := ebiten.NewImage(common.ScreenWidth, common.ScreenHeight)
+		bg.Fill(colorGoal)
+		screen.DrawImage(bg, op)
+	}
+	if bs.state.Status == DayStarting {
+		colorGoal := color.RGBA{0, 0, 0, bs.TransitionSleep}
+		if bs.TransitionSleep > 1 {
+			bs.TransitionSleep--
+		} else {
+			bs.state.Day++
+			bs.state.Status = Playing
 		}
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(0, 0)
@@ -93,7 +107,14 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 }
 
 func (bs *BaseScene) Update() error {
-	bs.endOfDay.Update()
+	if bs.endOfDay != nil {
+		bs.endOfDay.Update()
+		if bs.endOfDay.done {
+			bs.endOfDay = nil
+			bs.state.Status = DayStarting
+		}
+	}
+
 	if bs.Text.Visible() {
 		bs.Text.Update()
 		return nil
@@ -234,6 +255,13 @@ func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
 
 	if bs.state.Status == InitialState {
 		bs.state.Status = Playing
+		bs.state.Stats = make(map[string]int)
+		bs.state.Stats[npc.Money] = 13
+		bs.state.Stats[npc.Happiness] = 10
+		bs.state.Stats[npc.Security] = 15
+		bs.state.Stats[npc.Food] = 10
+		bs.state.Stats[npc.Health] = 30
+		bs.state.Day = 1
 		return
 	}
 
@@ -310,12 +338,6 @@ func (bs *BaseScene) SetupUI() {
 		Container: rootContainer,
 	}
 	bs.ui = &ui
-}
-
-func (bs *BaseScene) calculateDay() {
-	// TODO Calculate town security
-	//
-
 }
 
 func progress(current int) *widget.ProgressBar {

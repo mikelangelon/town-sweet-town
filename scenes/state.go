@@ -10,6 +10,8 @@ type State struct {
 	Player *graphics.Char
 	Status int
 	World  map[string]*SceneMap
+	Stats  map[string]int
+	Day    int
 }
 
 type SceneMap struct {
@@ -38,4 +40,5 @@ const (
 	Playing
 	Transitioning
 	DayEnding
+	DayStarting
 )

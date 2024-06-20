@@ -11,13 +11,14 @@ const (
 	Health    = "health"
 	Security  = "security"
 	Food      = "food"
-	Rent      = "rent"
+	Money     = "money"
 )
 
 type Stats struct {
+	Food      int
+	Money     int
 	Happiness int
 	Security  int
-	Food      int
 	Cultural  int
 	Health    int
 }

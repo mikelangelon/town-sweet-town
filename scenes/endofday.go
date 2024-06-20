@@ -20,6 +20,7 @@ type endOfDay struct {
 	currentStuff  *widget.Text
 
 	stats map[string]int
+	done  bool
 }
 
 func (e *endOfDay) Update() {
@@ -37,20 +38,19 @@ func (e *endOfDay) Update() {
 			switch name {
 			case npc.Security, npc.Health, npc.Cultural, npc.Happiness:
 				e.mapProgress[name].SetCurrent(e.stats[name])
-			case npc.Rent, npc.Food:
+			case npc.Money, npc.Food:
 				e.mapStats[name].Label = fmt.Sprintf("Food: %d", e.stats[name])
 			}
 			e.endOfDayIndex++
 		} else {
-			e.endOfDayTimer = nil
+			e.done = true
 		}
 	}
 }
 
-func createShowEndOfDay(npcs npc.NPCs) *endOfDay {
+func createShowEndOfDay(npcs npc.NPCs, day int, stats map[string]int) *endOfDay {
 
 	var e endOfDay
-	var total npc.Stats
 	e.endOfDaySteps = npcs.AllSteps()
 	t := time.Now()
 	e.endOfDayTimer = &t
@@ -99,17 +99,17 @@ func createShowEndOfDay(npcs npc.NPCs) *endOfDay {
 	}
 	face, _ := loadFont(20)
 	label1 := widget.NewText(
-		widget.TextOpts.Text("Day 1 - Results", face, color.White),
+		widget.TextOpts.Text(fmt.Sprintf("Day %d - Results", day), face, color.White),
 	)
 	lRent := widget.NewText(
-		widget.TextOpts.Text("Rent: 10 euros", face, color.White),
+		widget.TextOpts.Text(moneyText(stats[npc.Money]), face, color.White),
 	)
-	e.stats = make(map[string]int)
+	e.stats = stats
 	e.mapStats = make(map[string]*widget.Text)
 	e.mapProgress = make(map[string]*widget.ProgressBar)
 
 	e.mapStats[npc.Food] = widget.NewText(
-		widget.TextOpts.Text("Food: 0", face, color.White),
+		widget.TextOpts.Text(foodText(stats[npc.Food]), face, color.White),
 	)
 	lHappiness := widget.NewText(
 		widget.TextOpts.Text("Happiness", face, color.White),
@@ -127,10 +127,10 @@ func createShowEndOfDay(npcs npc.NPCs) *endOfDay {
 		widget.TextOpts.Text("...", face, color.White),
 	)
 
-	e.mapProgress[npc.Security] = progress(total.Security)
-	e.mapProgress[npc.Happiness] = progress(total.Happiness)
-	e.mapProgress[npc.Health] = progress(total.Health)
-	e.mapProgress[npc.Cultural] = progress(total.Cultural)
+	e.mapProgress[npc.Security] = progress(stats[npc.Security])
+	e.mapProgress[npc.Happiness] = progress(stats[npc.Happiness])
+	e.mapProgress[npc.Health] = progress(stats[npc.Health])
+	e.mapProgress[npc.Cultural] = progress(stats[npc.Cultural])
 	rootContainer.AddChild(label1)
 	rootContainer.AddChild(secondaryContainer)
 	secondaryContainer.AddChild(leftContainer)
@@ -149,4 +149,11 @@ func createShowEndOfDay(npcs npc.NPCs) *endOfDay {
 
 	e.ui = &ui
 	return &e
+}
+
+func moneyText(money int) string {
+	return fmt.Sprintf("Money: %d", money)
+}
+func foodText(food int) string {
+	return fmt.Sprintf("Food: %d", food)
 }
