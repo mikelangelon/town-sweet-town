@@ -9,6 +9,7 @@ import (
 )
 
 type GameLogic struct {
+	HouseFactory     *graphics.HouseFactory
 	NPCFactory       npc.NPCFactory
 	CharFactory      *graphics.CharFactory
 	FancyTownFactory *graphics.CharFactory
@@ -20,6 +21,7 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 	case 1:
 		char := g.CharFactory.NewChar(1, []int{10, 111, 304}, 16*6, 16*6)
 		fire := g.FancyTownFactory.NewChar(470, nil, 16*6, 16*10)
+		signal1 := g.FancyTownFactory.NewChar(470, nil, 16*6, 16*10)
 		return scenes.State{
 			GameLogic: g,
 			Player:    char,
@@ -27,8 +29,8 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 			World: map[string]*scenes.SceneMap{
 				"town1": {
 					Houses: []*house.House{
-						{ID: "House 1", Position: common.Position{X: 6 * 16, Y: 6 * 16}},
-						{ID: "House 2", Position: common.Position{X: 17 * 16, Y: 11 * 16}},
+						{ID: "House 1", House: g.HouseFactory.Houses[0]},
+						{ID: "House 2", House: g.HouseFactory.Houses[1]},
 					},
 					Objects: []*graphics.Char{
 						fire,

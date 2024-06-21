@@ -140,6 +140,10 @@ func (t *Town) KickOutHouse(npc *npc.NPC) {
 func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 	t.BaseScene.Load(st, sm)
 
+	for _, v := range t.state.World["town1"].Houses {
+		t.MapScene.Child = append(t.MapScene.Child, v.House)
+	}
+
 	if t.state.Status == InitialState {
 		t.state.Status = Playing
 		t.state.Stats = make(map[string]int)
@@ -151,6 +155,7 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 		t.state.Day = 1
 		return
 	}
+
 	timer := time.NewTimer(500 * time.Millisecond)
 	go func() {
 		<-timer.C

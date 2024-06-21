@@ -14,10 +14,6 @@ func NewHouseFactory() (*HouseFactory, error) {
 	if err != nil {
 		return nil, err
 	}
-	houseFancy, err := NewMapScene(assets.FancyTown, assets.House4, assets.FancyTownTSX, common.ScreenWidth, common.ScreenHeight, common.Scale)
-	if err != nil {
-		return nil, err
-	}
 	house2, err := NewMapScene(assets.TileMapPacked, assets.House2, assets.TileMapPackedTSX, common.ScreenWidth, common.ScreenHeight, common.Scale)
 	if err != nil {
 		return nil, err
@@ -27,6 +23,10 @@ func NewHouseFactory() (*HouseFactory, error) {
 		return nil, err
 	}
 	tend, err := NewMapScene(assets.FancyTown, assets.Tend, assets.FancyTownTSX, common.ScreenWidth, common.ScreenHeight, common.Scale)
+	if err != nil {
+		return nil, err
+	}
+	houseFancy, err := NewMapScene(assets.FancyTown, assets.House4, assets.FancyTownTSX, common.ScreenWidth, common.ScreenHeight, common.Scale)
 	if err != nil {
 		return nil, err
 	}

@@ -20,7 +20,7 @@ type MapScene struct {
 
 	screenWidth, screenHeight, scale int
 
-	offset common.Position
+	Offset common.Position
 	Child  []*MapScene
 }
 
@@ -70,7 +70,7 @@ func (g *MapScene) Draw(screen *ebiten.Image) {
 			op := &ebiten.DrawImageOptions{}
 			tx := int64((i % g.Map.Width) * g.Map.TileWidth)
 			ty := int64((i / g.Map.Width) * g.Map.TileHeight)
-			op.GeoM.Translate(float64(tx+g.offset.X), float64(ty+g.offset.Y))
+			op.GeoM.Translate(float64(tx+g.Offset.X), float64(ty+g.Offset.Y))
 			op.GeoM.Scale(scaleX, scaleY)
 
 			screen.DrawImage(g.tileImage(int(id-1)), op)
@@ -86,7 +86,7 @@ func (g *MapScene) Scale() (float64, float64) {
 }
 
 func (g *MapScene) SetOffset(offset common.Position) {
-	g.offset = offset
+	g.Offset = offset
 }
 
 func (g *MapScene) tileImage(id int) *ebiten.Image {
@@ -102,7 +102,7 @@ func (g *MapScene) tileImage(id int) *ebiten.Image {
 }
 
 func (g *MapScene) TileForPos(x, y int) Tile {
-	if x < 0 || y < 0 {
+	if x < 0 || y < 0 || x > g.Map.Width*g.Map.TileWidth || y > g.Map.Height*g.Map.TileHeight {
 		return Tile{}
 	}
 	rx := x / g.Map.TileWidth
@@ -130,7 +130,7 @@ func (g *MapScene) AnyPropertyTileAs(x, y int, property, value string) bool {
 		return true
 	}
 	for _, v := range g.Child {
-		if value := v.AnyPropertyTileAs(x-int(v.offset.X), y-int(v.offset.Y), property, value); value {
+		if value := v.AnyPropertyTileAs(x-int(v.Offset.X), y-int(v.Offset.Y), property, value); value {
 			return true
 		}
 	}

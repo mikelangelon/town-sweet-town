@@ -108,8 +108,8 @@ func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
 	for _, v := range bs.state.World[bs.ID].Houses {
 		if v.Owner != nil {
 			npc := bs.state.World[bs.ID].NPCs.GetNPC(*v.Owner)
-			npc.X = v.Position.X + 16
-			npc.Y = v.Position.Y + 16
+			npc.X = v.DoorPosition().X + 16
+			npc.Y = v.DoorPosition().Y + 16
 			npc.Move = nil
 		}
 	}
