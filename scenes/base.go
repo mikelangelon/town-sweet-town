@@ -34,12 +34,10 @@ type BaseScene struct {
 
 	// Between scenes
 	TransitionPoints Transition
-	TransitionSleep  uint8
 
 	//UI
-	Text     textbox.TextBox
-	ui       *ebitenui.UI
-	endOfDay *endOfDay
+	Text textbox.TextBox
+	ui   *ebitenui.UI
 }
 
 func (bs *BaseScene) Layout(w, h int) (int, int) {
@@ -47,8 +45,42 @@ func (bs *BaseScene) Layout(w, h int) (int, int) {
 	return w, h
 }
 
-func (bs *BaseScene) Unload() State {
-	return bs.state
+func (bs *BaseScene) Update() (bool, error) {
+	if bs.Text.Visible() {
+		bs.Text.Update()
+		return true, nil
+	}
+	if bs.ui != nil {
+		bs.ui.Update()
+	}
+	if bs.state.Status != Playing {
+		return true, nil
+	}
+
+	// Deal with NPC moves
+	for _, v := range bs.NPCs {
+		v.Update()
+	}
+
+	// Deal with player moves
+	pressed, err := bs.playerUpdate()
+	if err != nil {
+		return true, err
+	}
+	if !pressed {
+		return true, nil
+	}
+
+	// Change scene
+	v := bs.TransitionPoints
+	x, y := bs.state.Player.X, bs.state.Player.Y
+	if x >= v.Position.X && x < v.Position.X+16 &&
+		y >= v.Position.Y && y < v.Position.Y+16 {
+		bs.sm.SwitchWithTransition(v.Scene, stagehand.NewTicksTimedSlideTransition[State](v.Direction, time.Second*time.Duration(1)))
+		return false, nil
+	}
+
+	return false, nil
 }
 
 func (bs *BaseScene) Draw(screen *ebiten.Image) {
@@ -61,35 +93,6 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 		v.Draw(screen)
 	}
 	bs.Text.Draw(screen)
-	if bs.state.Status == DayEnding {
-		colorGoal := color.RGBA{10, 10, 10, bs.TransitionSleep}
-		if bs.TransitionSleep < 200 {
-			bs.TransitionSleep++
-		} else {
-			if bs.endOfDay == nil {
-				bs.endOfDay = createShowEndOfDay(bs.NPCs, bs.state.Day, bs.state.Stats)
-			}
-		}
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(0, 0)
-		bg := ebiten.NewImage(common.ScreenWidth, common.ScreenHeight)
-		bg.Fill(colorGoal)
-		screen.DrawImage(bg, op)
-	}
-	if bs.state.Status == DayStarting {
-		colorGoal := color.RGBA{0, 0, 0, bs.TransitionSleep}
-		if bs.TransitionSleep > 1 {
-			bs.TransitionSleep--
-		} else {
-			bs.state.Day++
-			bs.state.Status = Playing
-		}
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(0, 0)
-		bg := ebiten.NewImage(common.ScreenWidth, common.ScreenHeight)
-		bg.Fill(colorGoal)
-		screen.DrawImage(bg, op)
-	}
 	if bs.ui != nil {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(500, 0)
@@ -97,126 +100,6 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 		bs.ui.Draw(bg)
 		screen.DrawImage(bg, op)
 	}
-	if bs.endOfDay != nil {
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(50, 150)
-		bg := ebiten.NewImage(500, 300)
-		bs.endOfDay.ui.Draw(bg)
-		screen.DrawImage(bg, op)
-	}
-}
-
-func (bs *BaseScene) Update() error {
-	if bs.Text.Visible() {
-		bs.Text.Update()
-		return nil
-	}
-	if bs.ui != nil {
-		bs.ui.Update()
-	}
-	if bs.state.Status != Playing {
-		return nil
-	}
-
-	// Deal with NPC moves
-	for _, v := range bs.NPCs {
-		v.Update()
-	}
-
-	// Deal with player moves
-	pressed, err := bs.playerUpdate()
-	if err != nil {
-		return err
-	}
-	if !pressed {
-		return nil
-	}
-
-	// Change scene
-	v := bs.TransitionPoints
-	x, y := bs.state.Player.X, bs.state.Player.Y
-	if x >= v.Position.X && x < v.Position.X+16 &&
-		y >= v.Position.Y && y < v.Position.Y+16 {
-		bs.sm.SwitchWithTransition(v.Scene, stagehand.NewTicksTimedSlideTransition[State](v.Direction, time.Second*time.Duration(1)))
-		return nil
-	}
-
-	return nil
-}
-
-func (bs *BaseScene) Action(collision *resolv.Collision) {
-	if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
-		if c.House != nil {
-			bs.KickOutHouse(c)
-		} else {
-			bs.TalkToNPC(c)
-		}
-	}
-	if c, ok := collision.Objects[0].Data.(*graphics.Char); ok {
-		bs.ActionToObject(c)
-	}
-}
-
-func (bs *BaseScene) TalkToNPC(npc *npc.NPC) {
-	answerFunc := func(answer string) {
-		if answer != textbox.NoResponse && answer != textbox.No {
-			for _, v := range bs.state.World["town1"].Houses {
-				if v.ID == answer {
-					npc.SetHouse(v, bs.state.Day)
-					v.Owner = &npc.ID
-				}
-			}
-			npc.Move = &common.Position{X: -16, Y: npc.Y}
-			bs.state.World["people"].RemoveNPC(npc.ID)
-			bs.state.World["town1"].AddNPC(npc)
-		}
-	}
-	var options []string
-	for _, v := range bs.state.World["town1"].Houses {
-		if v.Owner != nil {
-			continue
-		}
-		options = append(options, v.ID)
-	}
-
-	if npc.DayIn == bs.state.Day {
-		bs.Text.Show(npc.Talk(bs.state.Day))
-	} else {
-		options = append(options, textbox.NoResponse)
-		bs.Text.ShowAndQuestion(npc.Talk(bs.state.Day), options, answerFunc)
-	}
-}
-
-func (bs *BaseScene) KickOutHouse(npc *npc.NPC) {
-	options := []string{"Sorry, leave the house", textbox.NoResponse}
-	answerFunc := func(answer string) {
-
-		if answer == "Sorry, leave the house" {
-			for _, v := range bs.state.World["town1"].Houses {
-				if v.ID == npc.House.ID {
-					v.Owner = nil
-					npc.SetHouse(nil, 0)
-					break
-				}
-			}
-			bs.state.World["town1"].RemoveNPC(npc.ID)
-			bs.state.World["people"].AddNPC(npc)
-			npc.X = 16 * 6
-			npc.Y = 17 * 6
-		}
-	}
-
-	bs.Text.ShowAndQuestion([]string{"How can I help you?"}, options, answerFunc)
-}
-
-func (bs *BaseScene) ActionToObject(object *graphics.Char) {
-	bs.Text.ShowAndQuestion(
-		[]string{"Go to the next day?"},
-		[]string{"Yes", textbox.No},
-		func(answer string) {
-			bs.state.Status = DayEnding
-		},
-	)
 }
 
 func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
@@ -232,24 +115,10 @@ func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
 	}
 	bs.NPCs = bs.state.World[bs.ID].NPCs
 	bs.Objects = bs.state.World[bs.ID].Objects
+}
 
-	if bs.state.Status == InitialState {
-		bs.state.Status = Playing
-		bs.state.Stats = make(map[string]int)
-		bs.state.Stats[npc.Money] = 13
-		bs.state.Stats[npc.Happiness] = 10
-		bs.state.Stats[npc.Security] = 15
-		bs.state.Stats[npc.Food] = 10
-		bs.state.Stats[npc.Health] = 30
-		bs.state.Day = 1
-		return
-	}
-
-	timer := time.NewTimer(500 * time.Millisecond)
-	go func() {
-		<-timer.C
-		bs.state.Player.X, bs.state.Player.Y = bs.TransitionPoints.Position.X, bs.TransitionPoints.Position.Y
-	}()
+func (bs *BaseScene) Unload() State {
+	return bs.state
 }
 
 func (bs *BaseScene) SetupUI() {
@@ -320,6 +189,34 @@ func (bs *BaseScene) SetupUI() {
 	bs.ui = &ui
 }
 
+func (bs *BaseScene) checkActionExecuted() *resolv.Collision {
+	if !inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		return nil
+	}
+	// TODO it seems a bit inneficient to recreate this every time
+	space := resolv.NewSpace(640, 480, 16, 16)
+	player := resolv.NewObject(float64(bs.state.Player.X), float64(bs.state.Player.Y), 16, 16)
+	space.Add(player)
+	for _, v := range bs.NPCs {
+		person := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
+		person.Data = v
+		space.Add(person)
+	}
+	for _, v := range bs.Objects {
+		person := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
+		person.Data = v
+		space.Add(person)
+	}
+
+	if collision := player.Check(16, 0); collision != nil {
+		return collision
+	}
+	if collision := player.Check(-16, 0); collision != nil {
+		return collision
+	}
+	return nil
+}
+
 // returns if something was pressed and the error
 func (bs *BaseScene) playerUpdate() (bool, error) {
 	var speed int64 = common.TileSize
@@ -343,27 +240,7 @@ func (bs *BaseScene) playerUpdate() (bool, error) {
 		x += speed
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		// TODO it seems a bit inneficient to recreate this every time
-		space := resolv.NewSpace(640, 480, 16, 16)
-		player := resolv.NewObject(float64(bs.state.Player.X), float64(bs.state.Player.Y), 16, 16)
-		space.Add(player)
-		for _, v := range bs.NPCs {
-			person := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
-			person.Data = v
-			space.Add(person)
-		}
-		for _, v := range bs.Objects {
-			person := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
-			person.Data = v
-			space.Add(person)
-		}
-
-		if collision := player.Check(16, 0); collision != nil {
-			bs.Action(collision)
-		}
-		if collision := player.Check(-16, 0); collision != nil {
-			bs.Action(collision)
-		}
+		pressed = true
 	}
 	if x > (common.ScreenWidth-16)/common.Scale || x < 0 ||
 		y < 0 || y > (common.ScreenHeight-16)/common.Scale {

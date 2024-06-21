@@ -1,14 +1,27 @@
 package scenes
 
-import "github.com/mikelangelon/town-sweet-town/graphics"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/joelschutz/stagehand"
+	"github.com/mikelangelon/town-sweet-town/common"
+	"github.com/mikelangelon/town-sweet-town/graphics"
+	"github.com/mikelangelon/town-sweet-town/textbox"
+	"github.com/mikelangelon/town-sweet-town/world/npc"
+	"github.com/solarlune/resolv"
+	"image/color"
+	"time"
+)
 
 type Town struct {
 	BaseScene
+
+	endOfDay        *endOfDay
+	TransitionSleep uint8
 }
 
 func NewTown(id string, mapScene *graphics.MapScene) *Town {
 	return &Town{
-		BaseScene{ID: id, MapScene: mapScene},
+		BaseScene: BaseScene{ID: id, MapScene: mapScene},
 	}
 }
 
@@ -20,5 +33,122 @@ func (t *Town) Update() error {
 			t.state.Status = DayStarting
 		}
 	}
-	return t.BaseScene.Update()
+	skip, err := t.BaseScene.Update()
+	if err != nil {
+		return err
+	}
+	if skip {
+		return nil
+	}
+	action := t.checkActionExecuted()
+	if action != nil {
+		t.Action(action)
+	}
+	return nil
+}
+
+func (t *Town) Draw(screen *ebiten.Image) {
+	t.BaseScene.Draw(screen)
+	if t.state.Status == DayEnding {
+		colorGoal := color.RGBA{10, 10, 10, t.TransitionSleep}
+		if t.TransitionSleep < 200 {
+			t.TransitionSleep++
+		} else {
+			if t.endOfDay == nil {
+				t.endOfDay = createShowEndOfDay(t.NPCs, t.state.Day, t.state.Stats)
+			}
+		}
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(0, 0)
+		bg := ebiten.NewImage(common.ScreenWidth, common.ScreenHeight)
+		bg.Fill(colorGoal)
+		screen.DrawImage(bg, op)
+	}
+	if t.state.Status == DayStarting {
+		colorGoal := color.RGBA{0, 0, 0, t.TransitionSleep}
+		if t.TransitionSleep > 1 {
+			t.TransitionSleep--
+		} else {
+			t.state.Day++
+			t.state.Status = Playing
+		}
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(0, 0)
+		bg := ebiten.NewImage(common.ScreenWidth, common.ScreenHeight)
+		bg.Fill(colorGoal)
+		screen.DrawImage(bg, op)
+	}
+	if t.endOfDay != nil {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(50, 150)
+		bg := ebiten.NewImage(500, 300)
+		t.endOfDay.ui.Draw(bg)
+		screen.DrawImage(bg, op)
+	}
+}
+
+func (t *Town) Action(collision *resolv.Collision) {
+	if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
+		t.KickOutHouse(c)
+	}
+	if _, ok := collision.Objects[0].Data.(*graphics.Char); ok {
+		t.FireAction()
+	}
+}
+
+func (t *Town) FireAction() {
+	t.Text.ShowAndQuestion(
+		[]string{"Go to the next day?"},
+		[]string{"Yes", textbox.No},
+		func(answer string) {
+			if answer == "Yes" {
+				t.state.Status = DayEnding
+			} else {
+				t.state.Status = Playing
+			}
+		},
+	)
+}
+
+func (t *Town) KickOutHouse(npc *npc.NPC) {
+	options := []string{"Sorry, leave the house", textbox.NoResponse}
+	answerFunc := func(answer string) {
+
+		if answer == "Sorry, leave the house" {
+			for _, v := range t.state.World["town1"].Houses {
+				if v.ID == npc.House.ID {
+					v.Owner = nil
+					npc.SetHouse(nil, 0)
+					break
+				}
+			}
+			t.state.World["town1"].RemoveNPC(npc.ID)
+			t.state.World["people"].AddNPC(npc)
+			npc.X = 16 * 6
+			npc.Y = 17 * 6
+		}
+	}
+
+	t.Text.ShowAndQuestion([]string{"How can I help you?"}, options, answerFunc)
+}
+
+func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
+	t.BaseScene.Load(st, sm)
+
+	if t.state.Status == InitialState {
+		t.state.Status = Playing
+		t.state.Stats = make(map[string]int)
+		t.state.Stats[npc.Money] = 13
+		t.state.Stats[npc.Happiness] = 10
+		t.state.Stats[npc.Security] = 15
+		t.state.Stats[npc.Food] = 10
+		t.state.Stats[npc.Health] = 30
+		t.state.Day = 1
+		return
+	}
+	timer := time.NewTimer(500 * time.Millisecond)
+	go func() {
+		<-timer.C
+		t.state.Player.X, t.state.Player.Y = t.TransitionPoints.Position.X, t.TransitionPoints.Position.Y
+	}()
 }
