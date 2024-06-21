@@ -22,8 +22,6 @@ func main() {
 	houseFactory, err := graphics.NewHouseFactory()
 	houseFactory.Houses[0].SetOffset(common.Position{X: 3 * 16, Y: 3 * 16})
 	houseFactory.Houses[1].SetOffset(common.Position{X: 14 * 16, Y: 8 * 16})
-	//town1.Child = append(town1.Child, houseFactory.Houses[0])
-	//town1.Child = append(town1.Child, houseFactory.Houses[1])
 	people1, err := graphics.NewMapScene(assets.TileMapPacked, assets.People1, assets.TileMapPackedTSX, common.ScreenWidth, common.ScreenHeight, common.Scale)
 	if err != nil {
 		slog.Error("crash parseTileSet", "error", err)
@@ -35,6 +33,11 @@ func main() {
 		return
 	}
 	fancyTownFactory, err := graphics.NewCharFactory(assets.FancyTown, assets.FancyTownTSX, common.Scale)
+	if err != nil {
+		slog.Error("crash parseTileSet", "error", err)
+		return
+	}
+	tinyTownFactory, err := graphics.NewCharFactory(assets.TileMapPacked, assets.TileMapPackedTSX, common.Scale)
 	if err != nil {
 		slog.Error("crash parseTileSet", "error", err)
 		return
@@ -51,6 +54,7 @@ func main() {
 		NPCFactory:       npcFactory,
 		CharFactory:      charFactory,
 		FancyTownFactory: fancyTownFactory,
+		TinyTownFactory:  tinyTownFactory,
 		HouseFactory:     houseFactory,
 	}
 	state := gameLogic.NextDay(scenes.State{})

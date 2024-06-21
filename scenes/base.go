@@ -250,10 +250,15 @@ func (bs *BaseScene) playerUpdate() (bool, error) {
 	if !pressed {
 		return false, nil
 	}
-
+	for _, v := range bs.state.World[bs.ID].Objects {
+		if v.X == x && v.Y == y {
+			return true, nil
+		}
+	}
 	if !bs.MapScene.AnyPropertyTileAs(int(x+16/2), int(y), "blocked", "true") {
 		bs.state.Player.X, bs.state.Player.Y = x, y
 	}
+
 	return true, nil
 }
 

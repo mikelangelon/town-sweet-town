@@ -11,6 +11,7 @@ import (
 type GameLogic struct {
 	HouseFactory     *graphics.HouseFactory
 	NPCFactory       npc.NPCFactory
+	TinyTownFactory  *graphics.CharFactory
 	CharFactory      *graphics.CharFactory
 	FancyTownFactory *graphics.CharFactory
 }
@@ -21,7 +22,10 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 	case 1:
 		char := g.CharFactory.NewChar(1, []int{10, 111, 304}, 16*6, 16*6)
 		fire := g.FancyTownFactory.NewChar(470, nil, 16*6, 16*10)
-		signal1 := g.FancyTownFactory.NewChar(470, nil, 16*6, 16*10)
+		signal1 := g.TinyTownFactory.NewChar(83, nil, 16*4, 16*7)
+		signal2 := g.TinyTownFactory.NewChar(83, nil, 16*19, 16*11)
+		signal3 := g.TinyTownFactory.NewChar(83, nil, 16*17, 16*4)
+		signal4 := g.TinyTownFactory.NewChar(83, nil, 16*11, 16*17)
 		return scenes.State{
 			GameLogic: g,
 			Player:    char,
@@ -34,6 +38,7 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 					},
 					Objects: []*graphics.Char{
 						fire,
+						signal1, signal2, signal3, signal4,
 					},
 				},
 				"people": {
