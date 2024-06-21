@@ -2,6 +2,7 @@ package graphics
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/mikelangelon/town-sweet-town/common"
 )
 
 type Char struct {
@@ -11,6 +12,10 @@ type Char struct {
 
 	ScaleX, ScaleY float64
 	Stuff          []*ebiten.Image
+}
+
+func (c *Char) Position() common.Position {
+	return common.Position{X: c.X, Y: c.Y}
 }
 
 func (c *Char) Draw(screen *ebiten.Image) {

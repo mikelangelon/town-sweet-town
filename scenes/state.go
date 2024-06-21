@@ -2,6 +2,7 @@ package scenes
 
 import (
 	"github.com/mikelangelon/town-sweet-town/graphics"
+	"github.com/mikelangelon/town-sweet-town/world"
 	"github.com/mikelangelon/town-sweet-town/world/house"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 )
@@ -17,12 +18,13 @@ type State struct {
 
 type Brainer interface {
 	NextDay(state State) State
+	CreateHouse(id string, typ int64) house.House
 }
 
 type SceneMap struct {
 	NPCs    npc.NPCs
 	Houses  []*house.House
-	Objects []*graphics.Char
+	Objects []world.Object
 }
 
 func (s *SceneMap) AddNPC(npc *npc.NPC) {

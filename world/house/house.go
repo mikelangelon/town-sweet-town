@@ -8,7 +8,7 @@ import (
 type House struct {
 	ID    string
 	Owner *string
-	House *graphics.MapScene
+	House graphics.MapScene
 }
 
 func (h House) DoorPosition() common.Position {

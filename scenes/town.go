@@ -6,6 +6,8 @@ import (
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
 	"github.com/mikelangelon/town-sweet-town/textbox"
+	"github.com/mikelangelon/town-sweet-town/world"
+	"github.com/mikelangelon/town-sweet-town/world/house"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
 	"image/color"
@@ -92,9 +94,13 @@ func (t *Town) Action(collision *resolv.Collision) {
 	if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
 		t.KickOutHouse(c)
 	}
-	if _, ok := collision.Objects[0].Data.(*graphics.Char); ok {
+	if _, ok := collision.Objects[0].Data.(world.Fire); ok {
 		t.FireAction()
 	}
+	if c, ok := collision.Objects[0].Data.(house.Signal); ok {
+		t.SignalAction(c)
+	}
+
 }
 
 func (t *Town) FireAction() {
@@ -107,6 +113,40 @@ func (t *Town) FireAction() {
 			} else {
 				t.state.Status = Playing
 			}
+		},
+	)
+}
+
+func (t *Town) SignalAction(signal house.Signal) {
+	const (
+		tend    = "8 coins --> Tend House"
+		boring  = "10 coins --> Normal House"
+		red     = "11 coins --> Red House"
+		big     = "15 coins --> Big House"
+		fashion = "17 coins --> Fashion House"
+	)
+	t.Text.ShowAndQuestion(
+		[]string{"Which house do you want to build?"},
+		[]string{tend, boring, fashion, textbox.NoResponse},
+		func(answer string) {
+			var houseType int64 = -1
+			switch answer {
+			case tend:
+				houseType = 4
+			case boring:
+				houseType = 1
+			case red:
+				houseType = 2
+			case big:
+				houseType = 3
+			case fashion:
+				houseType = 4
+			default:
+				return
+			}
+			house := t.state.GameLogic.CreateHouse(signal.ID, houseType)
+			house.House.Offset = signal.HousePlace
+			t.MapScene.Child = append(t.MapScene.Child, &house.House)
 		},
 	)
 }
@@ -141,7 +181,7 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 	t.BaseScene.Load(st, sm)
 
 	for _, v := range t.state.World["town1"].Houses {
-		t.MapScene.Child = append(t.MapScene.Child, v.House)
+		t.MapScene.Child = append(t.MapScene.Child, &v.House)
 	}
 
 	if t.state.Status == InitialState {

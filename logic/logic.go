@@ -4,6 +4,7 @@ import (
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
 	"github.com/mikelangelon/town-sweet-town/scenes"
+	"github.com/mikelangelon/town-sweet-town/world"
 	"github.com/mikelangelon/town-sweet-town/world/house"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 )
@@ -16,29 +17,43 @@ type GameLogic struct {
 	FancyTownFactory *graphics.CharFactory
 }
 
+func (g GameLogic) CreateHouse(id string, typ int64) house.House {
+	return house.House{ID: id, House: *g.HouseFactory.Houses[typ]}
+}
+
 func (g GameLogic) NextDay(state scenes.State) scenes.State {
 	day := state.Day + 1
 	switch day {
 	case 1:
 		char := g.CharFactory.NewChar(1, []int{10, 111, 304}, 16*6, 16*6)
-		fire := g.FancyTownFactory.NewChar(470, nil, 16*6, 16*10)
-		signal1 := g.TinyTownFactory.NewChar(83, nil, 16*4, 16*7)
-		signal2 := g.TinyTownFactory.NewChar(83, nil, 16*19, 16*11)
-		signal3 := g.TinyTownFactory.NewChar(83, nil, 16*17, 16*4)
-		signal4 := g.TinyTownFactory.NewChar(83, nil, 16*11, 16*17)
+
+		fire := world.Fire{Char: g.FancyTownFactory.NewChar(470, nil, 16*6, 16*10)}
+		sWest := house.NewSignal(
+			g.TinyTownFactory.NewChar(83, nil, 16*4, 16*7),
+			"west",
+			common.Position{X: 3 * 16, Y: 3 * 16})
+		sEast := house.NewSignal(
+			g.TinyTownFactory.NewChar(83, nil, 16*19, 16*12),
+			"west",
+			common.Position{X: 14 * 16, Y: 8 * 16})
+		sNorth := house.NewSignal(
+			g.TinyTownFactory.NewChar(83, nil, 16*17, 16*4),
+			"west",
+			common.Position{X: 16 * 12, Y: 16 * 0})
+		sSouth := house.NewSignal(
+			g.TinyTownFactory.NewChar(83, nil, 16*11, 16*17),
+			"west",
+			common.Position{X: 16 * 7, Y: 16 * 13})
 		return scenes.State{
 			GameLogic: g,
 			Player:    char,
 			Status:    scenes.InitialState,
 			World: map[string]*scenes.SceneMap{
 				"town1": {
-					Houses: []*house.House{
-						{ID: "House 1", House: g.HouseFactory.Houses[0]},
-						{ID: "House 2", House: g.HouseFactory.Houses[1]},
-					},
-					Objects: []*graphics.Char{
+					Houses: []*house.House{},
+					Objects: []world.Object{
 						fire,
-						signal1, signal2, signal3, signal4,
+						sWest, sEast, sNorth, sSouth,
 					},
 				},
 				"people": {

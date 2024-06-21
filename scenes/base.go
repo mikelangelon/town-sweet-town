@@ -11,6 +11,7 @@ import (
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
 	"github.com/mikelangelon/town-sweet-town/textbox"
+	"github.com/mikelangelon/town-sweet-town/world"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
 	"golang.org/x/image/font"
@@ -30,7 +31,7 @@ type BaseScene struct {
 	ID       string
 	MapScene *graphics.MapScene
 	NPCs     npc.NPCs
-	Objects  []*graphics.Char
+	Objects  []world.Object
 
 	// Between scenes
 	TransitionPoints Transition
@@ -203,7 +204,7 @@ func (bs *BaseScene) checkActionExecuted() *resolv.Collision {
 		space.Add(person)
 	}
 	for _, v := range bs.Objects {
-		person := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
+		person := resolv.NewObject(float64(v.Position().X), float64(v.Position().Y), 16, 16)
 		person.Data = v
 		space.Add(person)
 	}
@@ -251,7 +252,7 @@ func (bs *BaseScene) playerUpdate() (bool, error) {
 		return false, nil
 	}
 	for _, v := range bs.state.World[bs.ID].Objects {
-		if v.X == x && v.Y == y {
+		if v.Position().X == x && v.Position().Y == y {
 			return true, nil
 		}
 	}
