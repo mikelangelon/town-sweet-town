@@ -124,9 +124,13 @@ func (t *Town) KickOutHouse(npc *npc.NPC) {
 				}
 			}
 			t.state.World["town1"].RemoveNPC(npc.ID)
-			t.state.World["people"].AddNPC(npc)
-			npc.X = 16 * 6
-			npc.Y = 17 * 6
+			newNpc := *npc
+			newNpc.X = 16 * 20
+			newNpc.Y = 16 * 6
+			newNpc.Move = &common.Position{X: 16 * 6, Y: 16 * 6}
+			t.state.World["people"].AddNPC(&newNpc)
+			npc.Move = &common.Position{X: common.ScreenWidth + 16, Y: npc.Y}
+
 		}
 	}
 
