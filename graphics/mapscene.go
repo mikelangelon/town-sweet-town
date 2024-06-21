@@ -5,6 +5,7 @@ import (
 	"errors"
 	ebiten "github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/mikelangelon/town-sweet-town/common"
 	"image"
 	"strconv"
 	"strings"
@@ -18,6 +19,9 @@ type MapScene struct {
 	FormattedLayer []formattedLayer
 
 	screenWidth, screenHeight, scale int
+
+	offset common.Position
+	Child  []*MapScene
 }
 
 type formattedLayer []int64
@@ -64,18 +68,25 @@ func (g *MapScene) Draw(screen *ebiten.Image) {
 	for _, layer := range g.FormattedLayer {
 		for i, id := range layer {
 			op := &ebiten.DrawImageOptions{}
-			tx := (i % g.Map.Width) * g.Map.TileWidth
-			ty := (i / g.Map.Width) * g.Map.TileHeight
-			op.GeoM.Translate(float64(tx), float64(ty))
+			tx := int64((i % g.Map.Width) * g.Map.TileWidth)
+			ty := int64((i / g.Map.Width) * g.Map.TileHeight)
+			op.GeoM.Translate(float64(tx+g.offset.X), float64(ty+g.offset.Y))
 			op.GeoM.Scale(scaleX, scaleY)
 
 			screen.DrawImage(g.tileImage(int(id-1)), op)
 		}
 	}
+	for _, v := range g.Child {
+		v.Draw(screen)
+	}
 }
 
 func (g *MapScene) Scale() (float64, float64) {
 	return float64(g.scale), float64(g.scale)
+}
+
+func (g *MapScene) SetOffset(offset common.Position) {
+	g.offset = offset
 }
 
 func (g *MapScene) tileImage(id int) *ebiten.Image {
@@ -91,10 +102,19 @@ func (g *MapScene) tileImage(id int) *ebiten.Image {
 }
 
 func (g *MapScene) TileForPos(x, y int) Tile {
+	if x < 0 || y < 0 {
+		return Tile{}
+	}
 	rx := x / g.Map.TileWidth
 	ry := y / g.Map.TileHeight
 
 	i := rx + ry*g.Map.Width
+	if i >= len(g.FormattedLayer[0]) {
+		return Tile{}
+	}
+	if i < 0 {
+		return Tile{}
+	}
 	id := g.FormattedLayer[0][i] - 1
 	for _, v := range g.TileSet.Tiles {
 		if v.Id == int(id) {
@@ -102,6 +122,19 @@ func (g *MapScene) TileForPos(x, y int) Tile {
 		}
 	}
 	return Tile{}
+}
+
+func (g *MapScene) AnyPropertyTileAs(x, y int, property, value string) bool {
+	t := g.TileForPos(x, y)
+	if t.Properties.HasPropertyAs(property, value) {
+		return true
+	}
+	for _, v := range g.Child {
+		if value := v.AnyPropertyTileAs(x-int(v.offset.X), y-int(v.offset.Y), property, value); value {
+			return true
+		}
+	}
+	return false
 }
 
 func formatLayers(tmx *Map) ([]formattedLayer, error) {

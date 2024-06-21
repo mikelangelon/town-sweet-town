@@ -14,6 +14,21 @@ var (
 	//go:embed town1.tmx
 	Town1 []byte
 
+	//go:embed house.tmx
+	House []byte
+
+	//go:embed house2.tmx
+	House2 []byte
+
+	//go:embed house3.tmx
+	House3 []byte
+
+	//go:embed house4.tmx
+	House4 []byte
+
+	//go:embed camping.tmx
+	Tend []byte
+
 	//go:embed town2.tmx
 	Town2 []byte
 

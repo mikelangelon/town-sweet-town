@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="8" height="4" tilewidth="16" tileheight="16" infinite="0" backgroundcolor="#000000" nextlayerid="3" nextobjectid="1">
+ <tileset firstgid="1" source="roguelikeSheet_transparent.tsx"/>
+ <layer id="1" name="Tile Layer 1" width="8" height="4">
+  <data encoding="csv">
+0,0,1215,1216,1217,0,0,0,
+0,1154,1329,1330,1331,1154,0,0,
+0,1098,1100,1101,1102,1098,0,0,
+0,1155,1157,1158,1159,1155,0,0
+</data>
+ </layer>
+ <layer id="2" name="Tile Layer 2" width="8" height="4">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,262,0,0,0,0
+</data>
+ </layer>
+</map>

@@ -251,8 +251,7 @@ func (bs *BaseScene) playerUpdate() (bool, error) {
 		return false, nil
 	}
 
-	t := bs.MapScene.TileForPos(int(x+16/2), int(y)) // to consider as position the middle-bottom pixel
-	if !t.Properties.HasPropertyAs("blocked", "true") {
+	if !bs.MapScene.AnyPropertyTileAs(int(x+16/2), int(y), "blocked", "true") {
 		bs.state.Player.X, bs.state.Player.Y = x, y
 	}
 	return true, nil
