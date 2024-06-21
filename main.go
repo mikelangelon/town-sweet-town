@@ -20,8 +20,6 @@ func main() {
 		return
 	}
 	houseFactory, err := graphics.NewHouseFactory()
-	houseFactory.Houses[0].SetOffset(common.Position{X: 3 * 16, Y: 3 * 16})
-	houseFactory.Houses[1].SetOffset(common.Position{X: 14 * 16, Y: 8 * 16})
 	people1, err := graphics.NewMapScene(assets.TileMapPacked, assets.People1, assets.TileMapPackedTSX, common.ScreenWidth, common.ScreenHeight, common.Scale)
 	if err != nil {
 		slog.Error("crash parseTileSet", "error", err)

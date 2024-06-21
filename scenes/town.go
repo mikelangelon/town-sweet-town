@@ -132,13 +132,13 @@ func (t *Town) SignalAction(signal house.Signal) {
 			var houseType int64 = -1
 			switch answer {
 			case tend:
-				houseType = 4
-			case boring:
-				houseType = 1
-			case red:
-				houseType = 2
-			case big:
 				houseType = 3
+			case boring:
+				houseType = 0
+			case red:
+				houseType = 1
+			case big:
+				houseType = 2
 			case fashion:
 				houseType = 4
 			default:
