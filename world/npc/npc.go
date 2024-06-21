@@ -15,6 +15,12 @@ type NPC struct {
 	Phrases []string
 	Chars   Chars
 	House   *house.House
+	DayIn   int
+}
+
+func (n *NPC) SetHouse(house *house.House, dayIn int) {
+	n.House = house
+	n.DayIn = dayIn
 }
 
 func (n *NPC) Update() error {
@@ -37,7 +43,7 @@ func (n *NPC) Update() error {
 	return nil
 }
 
-func (n *NPC) Talk() []string {
+func (n *NPC) Talk(day int) []string {
 	var result = []string{
 		fmt.Sprintf("My name is %s", n.ID),
 	}
@@ -46,6 +52,9 @@ func (n *NPC) Talk() []string {
 	}
 	if n.House == nil {
 		result = append(result, "Could I live in one house, please?")
+	}
+	if n.House != nil && n.DayIn != day {
+		result = append(result, "How can I help you?")
 	}
 	return result
 }

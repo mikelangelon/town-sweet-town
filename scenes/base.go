@@ -107,14 +107,6 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 }
 
 func (bs *BaseScene) Update() error {
-	if bs.endOfDay != nil {
-		bs.endOfDay.Update()
-		if bs.endOfDay.done {
-			bs.endOfDay = nil
-			bs.state.Status = DayStarting
-		}
-	}
-
 	if bs.Text.Visible() {
 		bs.Text.Update()
 		return nil
@@ -125,67 +117,24 @@ func (bs *BaseScene) Update() error {
 	if bs.state.Status != Playing {
 		return nil
 	}
+
+	// Deal with NPC moves
 	for _, v := range bs.NPCs {
 		v.Update()
 	}
-	var speed int64 = common.TileSize
-	var pressed = false
 
-	x, y := bs.state.Player.X, bs.state.Player.Y
-	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
-		pressed = true
-		y -= speed
+	// Deal with player moves
+	pressed, err := bs.playerUpdate()
+	if err != nil {
+		return err
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
-		pressed = true
-		y += speed
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
-		pressed = true
-		x -= speed
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
-		pressed = true
-		x += speed
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		// TODO it seems a bit inneficient to recreate this every time
-		space := resolv.NewSpace(640, 480, 16, 16)
-		player := resolv.NewObject(float64(bs.state.Player.X), float64(bs.state.Player.Y), 16, 16)
-		space.Add(player)
-		for _, v := range bs.NPCs {
-			npc := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
-			npc.Data = v
-			space.Add(npc)
-		}
-		for _, v := range bs.Objects {
-			npc := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
-			npc.Data = v
-			space.Add(npc)
-		}
-
-		if collision := player.Check(16, 0); collision != nil {
-			bs.Action(collision)
-		}
-		if collision := player.Check(-16, 0); collision != nil {
-			bs.Action(collision)
-		}
-	}
-
-	if x > (common.ScreenWidth-16)/common.Scale || x < 0 ||
-		y < 0 || y > (common.ScreenHeight-16)/common.Scale {
-		return nil
-	}
-
 	if !pressed {
 		return nil
 	}
 
-	t := bs.MapScene.TileForPos(int(x+16/2), int(y)) // to consider as position the middle-bottom pixel
-	if !t.Properties.HasPropertyAs("blocked", "true") {
-		bs.state.Player.X, bs.state.Player.Y = x, y
-	}
+	// Change scene
 	v := bs.TransitionPoints
+	x, y := bs.state.Player.X, bs.state.Player.Y
 	if x >= v.Position.X && x < v.Position.X+16 &&
 		y >= v.Position.Y && y < v.Position.Y+16 {
 		bs.sm.SwitchWithTransition(v.Scene, stagehand.NewTicksTimedSlideTransition[State](v.Direction, time.Second*time.Duration(1)))
@@ -197,7 +146,11 @@ func (bs *BaseScene) Update() error {
 
 func (bs *BaseScene) Action(collision *resolv.Collision) {
 	if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
-		bs.TalkToNPC(c)
+		if c.House != nil {
+			bs.KickOutHouse(c)
+		} else {
+			bs.TalkToNPC(c)
+		}
 	}
 	if c, ok := collision.Objects[0].Data.(*graphics.Char); ok {
 		bs.ActionToObject(c)
@@ -209,7 +162,7 @@ func (bs *BaseScene) TalkToNPC(npc *npc.NPC) {
 		if answer != textbox.NoResponse && answer != textbox.No {
 			for _, v := range bs.state.World["town1"].Houses {
 				if v.ID == answer {
-					npc.House = v
+					npc.SetHouse(v, bs.state.Day)
 					v.Owner = &npc.ID
 				}
 			}
@@ -225,8 +178,35 @@ func (bs *BaseScene) TalkToNPC(npc *npc.NPC) {
 		}
 		options = append(options, v.ID)
 	}
-	options = append(options, textbox.NoResponse)
-	bs.Text.ShowAndQuestion(npc.Talk(), options, answerFunc)
+
+	if npc.DayIn == bs.state.Day {
+		bs.Text.Show(npc.Talk(bs.state.Day))
+	} else {
+		options = append(options, textbox.NoResponse)
+		bs.Text.ShowAndQuestion(npc.Talk(bs.state.Day), options, answerFunc)
+	}
+}
+
+func (bs *BaseScene) KickOutHouse(npc *npc.NPC) {
+	options := []string{"Sorry, leave the house", textbox.NoResponse}
+	answerFunc := func(answer string) {
+
+		if answer == "Sorry, leave the house" {
+			for _, v := range bs.state.World["town1"].Houses {
+				if v.ID == npc.House.ID {
+					v.Owner = nil
+					npc.SetHouse(nil, 0)
+					break
+				}
+			}
+			bs.state.World["town1"].RemoveNPC(npc.ID)
+			bs.state.World["people"].AddNPC(npc)
+			npc.X = 16 * 6
+			npc.Y = 17 * 6
+		}
+	}
+
+	bs.Text.ShowAndQuestion([]string{"How can I help you?"}, options, answerFunc)
 }
 
 func (bs *BaseScene) ActionToObject(object *graphics.Char) {
@@ -338,6 +318,67 @@ func (bs *BaseScene) SetupUI() {
 		Container: rootContainer,
 	}
 	bs.ui = &ui
+}
+
+// returns if something was pressed and the error
+func (bs *BaseScene) playerUpdate() (bool, error) {
+	var speed int64 = common.TileSize
+	var pressed = false
+
+	x, y := bs.state.Player.X, bs.state.Player.Y
+	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
+		pressed = true
+		y -= speed
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
+		pressed = true
+		y += speed
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
+		pressed = true
+		x -= speed
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
+		pressed = true
+		x += speed
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		// TODO it seems a bit inneficient to recreate this every time
+		space := resolv.NewSpace(640, 480, 16, 16)
+		player := resolv.NewObject(float64(bs.state.Player.X), float64(bs.state.Player.Y), 16, 16)
+		space.Add(player)
+		for _, v := range bs.NPCs {
+			person := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
+			person.Data = v
+			space.Add(person)
+		}
+		for _, v := range bs.Objects {
+			person := resolv.NewObject(float64(v.X), float64(v.Y), 16, 16)
+			person.Data = v
+			space.Add(person)
+		}
+
+		if collision := player.Check(16, 0); collision != nil {
+			bs.Action(collision)
+		}
+		if collision := player.Check(-16, 0); collision != nil {
+			bs.Action(collision)
+		}
+	}
+	if x > (common.ScreenWidth-16)/common.Scale || x < 0 ||
+		y < 0 || y > (common.ScreenHeight-16)/common.Scale {
+		return true, nil
+	}
+
+	if !pressed {
+		return false, nil
+	}
+
+	t := bs.MapScene.TileForPos(int(x+16/2), int(y)) // to consider as position the middle-bottom pixel
+	if !t.Properties.HasPropertyAs("blocked", "true") {
+		bs.state.Player.X, bs.state.Player.Y = x, y
+	}
+	return true, nil
 }
 
 func progress(current int) *widget.ProgressBar {

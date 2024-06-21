@@ -73,14 +73,8 @@ func main() {
 			},
 		},
 	}
-	people1Scene := &scenes.BaseScene{
-		ID:       "people",
-		MapScene: people1,
-	}
-	town1Scene := &scenes.BaseScene{
-		ID:       "town1",
-		MapScene: town1,
-	}
+	people1Scene := scenes.NewEntrance("people", people1)
+	town1Scene := scenes.NewTown("town1", town1)
 	town1Scene.SetupUI()
 	town1Scene.TransitionPoints = scenes.Transition{
 		Position:  common.Position{X: 24 * 16, Y: 6 * 16},
