@@ -7,11 +7,16 @@ import (
 )
 
 type State struct {
-	Player *graphics.Char
-	Status int
-	World  map[string]*SceneMap
-	Stats  map[string]int
-	Day    int
+	Player    *graphics.Char
+	Status    int
+	World     map[string]*SceneMap
+	Stats     map[string]int
+	Day       int
+	GameLogic Brainer
+}
+
+type Brainer interface {
+	NextDay(state State) State
 }
 
 type SceneMap struct {

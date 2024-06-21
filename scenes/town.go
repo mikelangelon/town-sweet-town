@@ -31,6 +31,7 @@ func (t *Town) Update() error {
 		if t.endOfDay.done {
 			t.endOfDay = nil
 			t.state.Status = DayStarting
+			t.state.GameLogic.NextDay(t.state)
 		}
 	}
 	skip, err := t.BaseScene.Update()
