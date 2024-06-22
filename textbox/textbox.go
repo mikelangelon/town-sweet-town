@@ -53,10 +53,15 @@ func (c *TextBox) Update() error {
 	}
 	if !c.hasNext() {
 		if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
-			c.SelectedOption--
+			if c.SelectedOption > 0 {
+				c.SelectedOption--
+			}
 		}
 		if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
-			c.SelectedOption++
+			if c.SelectedOption+1 < len(c.Options) {
+				c.SelectedOption++
+			}
+
 		}
 	}
 	return nil

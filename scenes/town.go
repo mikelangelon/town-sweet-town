@@ -124,6 +124,9 @@ func (t *Town) SignalAction(signal house.Signal) {
 		append(options,
 			textbox.NoResponse),
 		func(answer string) {
+			if answer == textbox.NoResponse {
+				return
+			}
 			info := house.MapHouseBulding[answer]
 			if t.state.Stats["money"] < info.Cost {
 				t.Text.ShowAndQuestion([]string{"", "Not enough money. Sorry"}, nil, func(s string) {})
