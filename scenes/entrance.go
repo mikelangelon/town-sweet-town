@@ -64,10 +64,10 @@ func (e *Entrance) TalkToNPC(npc *npc.NPC) {
 	}
 
 	if npc.DayIn == e.state.Day {
-		e.Text.Show(npc.Talk(e.state.Day))
+		e.Text.TalkToNPC(npc.ID, npc.Talk(e.state.Day))
 	} else {
 		options = append(options, textbox.NoResponse)
-		e.Text.ShowAndQuestion(npc.Talk(e.state.Day), options, answerFunc)
+		e.Text.ShowAndQuestionNPC(npc.ID, npc.Talk(e.state.Day), options, answerFunc)
 	}
 }
 

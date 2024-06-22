@@ -27,6 +27,7 @@ type TextBox struct {
 	// has next phases. Also, for now defined when to do the question(if any)
 	next []string
 
+	PersonName     *string
 	Options        []string
 	SelectedOption int
 	answerFunc     func(answer string)
@@ -67,6 +68,16 @@ func (c *TextBox) Update() error {
 	return nil
 }
 
+func (c *TextBox) drawName(screen *ebiten.Image) {
+	if c.PersonName == nil {
+		return
+	}
+
+	opName := &text.DrawOptions{}
+	opName.GeoM.Translate(boxX-5, boxY-22)
+	opName.DrawImageOptions.ColorScale.Scale(0.9, 0.9, 0.1, 0)
+	_, _ = drawText(screen, *c.PersonName, opName)
+}
 func (c *TextBox) Draw(screen *ebiten.Image) {
 	if !c.visible {
 		return
@@ -74,6 +85,9 @@ func (c *TextBox) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(boxX, boxY)
 	screen.DrawImage(c.drawBackground(), op)
+
+	c.drawName(screen)
+
 	op2 := &text.DrawOptions{}
 	op2.GeoM.Translate(boxX, boxY)
 
@@ -150,6 +164,16 @@ func (c *TextBox) selectDefaultAnswer() {
 		}
 	}
 }
+
+func (c *TextBox) TalkToNPC(npcName string, text []string) {
+	c.PersonName = &npcName
+	c.Show(text)
+}
+func (c *TextBox) ShowAndQuestionNPC(npcName string, text []string, options []string, answerFunc func(string)) {
+	c.PersonName = &npcName
+	c.ShowAndQuestion(text, options, answerFunc)
+}
+
 func guiFont(size float64) *text.GoTextFace {
 	s, err := text.NewGoTextFaceSource(bytes.NewReader(assets.HolsteinFont))
 	if err != nil {

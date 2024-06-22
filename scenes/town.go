@@ -164,7 +164,7 @@ func (t *Town) KickOutHouse(npc *npc.NPC) {
 		}
 	}
 
-	t.Text.ShowAndQuestion([]string{"How can I help you?"}, options, answerFunc)
+	t.Text.ShowAndQuestionNPC(npc.ID, []string{"How can I help you?"}, options, answerFunc)
 }
 
 func (t *Town) Load(st State, sm stagehand.SceneController[State]) {

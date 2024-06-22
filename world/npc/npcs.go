@@ -1,5 +1,7 @@
 package npc
 
+import "fmt"
+
 type NPCs []*NPC
 
 func (n NPCs) GetNPC(id string) *NPC {
@@ -35,6 +37,7 @@ func (n NPCs) Money() []StatStep {
 func (n NPCs) Food() []StatStep {
 	var stat = Food
 	var steps []StatStep
+	steps = addSteps(steps, -2*len(n), nil, stat, fmt.Sprintf("%s Villagers", len(n)))
 	for _, v := range n {
 		m := v.Chars.charLevelMap()
 		if v1, ok1 := m[Cooking]; ok1 {
