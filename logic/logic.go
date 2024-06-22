@@ -17,7 +17,7 @@ type GameLogic struct {
 	FancyTownFactory *graphics.CharFactory
 }
 
-func (g GameLogic) CreateHouse(id string, typ int64) house.House {
+func (g GameLogic) CreateHouse(id string, typ int) house.House {
 	return house.House{ID: id, House: *g.HouseFactory.Houses[typ]}
 }
 

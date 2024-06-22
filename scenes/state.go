@@ -18,7 +18,7 @@ type State struct {
 
 type Brainer interface {
 	NextDay(state State) State
-	CreateHouse(id string, typ int64) house.House
+	CreateHouse(id string, typ int) house.House
 }
 
 type SceneMap struct {

@@ -118,33 +118,19 @@ func (t *Town) FireAction() {
 }
 
 func (t *Town) SignalAction(signal house.Signal) {
-	const (
-		tend    = "8 coins --> Tend House"
-		boring  = "10 coins --> Normal House"
-		red     = "11 coins --> Red House"
-		big     = "15 coins --> Big House"
-		fashion = "17 coins --> Fashion House"
-	)
+	options := house.MapHouseBulding.GiveMeThree()
 	t.Text.ShowAndQuestion(
 		[]string{"Which house do you want to build?"},
-		[]string{tend, boring, fashion, textbox.NoResponse},
+		append(options,
+			textbox.NoResponse),
 		func(answer string) {
-			var houseType int64 = -1
-			switch answer {
-			case tend:
-				houseType = 3
-			case boring:
-				houseType = 0
-			case red:
-				houseType = 1
-			case big:
-				houseType = 2
-			case fashion:
-				houseType = 4
-			default:
+			info := house.MapHouseBulding[answer]
+			if t.state.Stats["money"] < info.Cost {
+				t.Text.ShowAndQuestion([]string{"", "Not enough money. Sorry"}, nil, func(s string) {})
 				return
 			}
-			house := t.state.GameLogic.CreateHouse(signal.ID, houseType)
+			t.state.Stats["money"] -= info.Cost
+			house := t.state.GameLogic.CreateHouse(signal.ID, info.Type)
 			house.House.Offset = signal.HousePlace
 			t.MapScene.Child = append(t.MapScene.Child, &house.House)
 		},
