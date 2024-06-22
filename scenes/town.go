@@ -1,6 +1,7 @@
 package scenes
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/joelschutz/stagehand"
 	"github.com/mikelangelon/town-sweet-town/common"
@@ -133,7 +134,7 @@ func (t *Town) SignalAction(signal house.Signal) {
 				return
 			}
 			t.state.Stats["money"] -= info.Cost
-			newHouse := t.state.GameLogic.CreateHouse(signal.ID, info.Type)
+			newHouse := t.state.GameLogic.CreateHouse(fmt.Sprintf("%s %s", info.Name, signal.ID), info.Type)
 			newHouse.House.Offset = signal.HousePlace
 			t.MapScene.Child = append(t.MapScene.Child, &newHouse.House)
 			t.state.World["town1"].Houses = append(t.state.World["town1"].Houses, &newHouse)

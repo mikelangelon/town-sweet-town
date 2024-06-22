@@ -30,19 +30,19 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 		fire := world.Fire{Char: g.FancyTownFactory.NewChar(470, nil, 16*6, 16*10)}
 		sWest := house.NewSignal(
 			g.TinyTownFactory.NewChar(83, nil, 16*4, 16*7),
-			"west",
+			"West",
 			common.Position{X: 3 * 16, Y: 3 * 16})
 		sEast := house.NewSignal(
 			g.TinyTownFactory.NewChar(83, nil, 16*19, 16*11),
-			"west",
+			"East",
 			common.Position{X: 14 * 16, Y: 7 * 16})
 		sNorth := house.NewSignal(
 			g.TinyTownFactory.NewChar(83, nil, 16*17, 16*4),
-			"west",
+			"North",
 			common.Position{X: 16 * 12, Y: 16 * 0})
 		sSouth := house.NewSignal(
 			g.TinyTownFactory.NewChar(83, nil, 16*8, 16*17),
-			"west",
+			"South",
 			common.Position{X: 16 * 7, Y: 16 * 12})
 		return scenes.State{
 			GameLogic: g,
