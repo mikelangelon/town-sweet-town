@@ -14,7 +14,6 @@ type NPC struct {
 	graphics.Char
 	Move       *common.Position
 	moving     bool
-	Phrases    []string
 	Chars      Chars
 	House      *house.House
 	DayIn      int
@@ -46,7 +45,7 @@ func (n *NPC) Update() error {
 	return nil
 }
 
-func (n *NPC) Talk(day int) []string {
+func (n *NPC) Sentences() []string {
 	var result []string
 	if !n.alreadyMet {
 		result = append(result, fmt.Sprintf("My name is %s", n.ID))
@@ -54,16 +53,21 @@ func (n *NPC) Talk(day int) []string {
 	}
 	var group string
 	for i, v := range n.Chars.AsPhrases() {
+		group += v + "\n"
 		if (i+1)%(groupPhases+1) == 0 {
 			result = append(result, group)
 			group = ""
 			continue
 		}
-		group += v + "\n"
+
 	}
 	if len(group) > 0 {
 		result = append(result, group)
 	}
+	return result
+}
+func (n *NPC) Talk(day int) []string {
+	result := n.Sentences()
 	if n.House == nil {
 		result = append(result, "Could I live in one house, please?")
 	}

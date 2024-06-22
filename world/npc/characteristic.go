@@ -2,6 +2,7 @@ package npc
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 )
 
@@ -80,6 +81,22 @@ func (c Chars) charLevelMap() map[string]int {
 		m[k.Name] = int(k.Level)
 	}
 	return m
+}
+
+func WithRandom(amount int) Chars {
+	var result Chars
+	options := []string{
+		Extrovert, Competitive, Optimistic, Adventurous, Sports, Workaholic, Reading, Cooking, Music, Animals,
+	}
+	for i := 0; i < amount; i++ {
+		index := rand.Intn(len(options))
+		result = append(result, Characteristic{
+			Name:  options[index],
+			Level: int64(rand.Intn(10)),
+		})
+		options = append(options[0:index], options[index+1:]...)
+	}
+	return result.WithRent(3)
 }
 
 const (
