@@ -11,18 +11,21 @@ type NPCFactory struct {
 	Scale       int
 }
 
-func (n *NPCFactory) NewNPC(id int, withIDs []int, x, y int64, move *common.Position, chs Chars) *NPC {
+func (n *NPCFactory) NewNPC(id int, withIDs []int, pos common.Position, chs Chars) *NPC {
 	return &NPC{
 		Char: graphics.Char{
 			ID:     fake.FirstName(),
 			Image:  n.CharFactory.CharImage(id),
-			X:      x,
-			Y:      y,
+			X:      pos.X,
+			Y:      pos.Y,
 			ScaleX: float64(n.Scale),
 			ScaleY: float64(n.Scale),
 			Stuff:  n.CharFactory.CharImages(withIDs),
 		},
-		Move:  move,
+		Move: &common.Position{
+			X: pos.X - 7*16,
+			Y: pos.Y,
+		},
 		Chars: chs,
 	}
 }

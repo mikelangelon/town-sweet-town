@@ -7,6 +7,7 @@ import (
 	"github.com/mikelangelon/town-sweet-town/world"
 	"github.com/mikelangelon/town-sweet-town/world/house"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
+	"math/rand"
 )
 
 type GameLogic struct {
@@ -22,7 +23,25 @@ func (g GameLogic) CreateHouse(id string, typ int) house.House {
 }
 
 func (g GameLogic) NextDay(state scenes.State) scenes.State {
+	entrance := state.World["people"]
 	day := state.Day + 1
+
+	const offsetX = 13
+	const offsetY = 4
+	var positionAvailable []common.Position
+	for x := 1; x < 10; x++ {
+		for y := 1; y < 14; y++ {
+			positionAvailable = append(positionAvailable, common.Position{X: int64(x+offsetX) * 16, Y: int64(y+offsetY) * 16})
+		}
+	}
+
+	getPositionAvailable := func() common.Position {
+		index := rand.Intn(len(positionAvailable) + 1)
+		pos := positionAvailable[index]
+		positionAvailable = append(positionAvailable[:index], positionAvailable[index+1:]...)
+		return pos
+	}
+
 	switch day {
 	case 1:
 		char := g.CharFactory.NewChar(1, []int{10, 111, 304}, 16*6, 16*6)
@@ -58,29 +77,28 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 				},
 				"people": {
 					NPCs: []*npc.NPC{
-						g.NPCFactory.NewNPC(54, []int{11, 22}, 16*30, 16*6,
-							&common.Position{X: 16 * 18, Y: 16 * 6},
+						g.NPCFactory.NewNPC(54, []int{11, 22}, getPositionAvailable(),
 							npc.WithCharacteristic(npc.Sports, npc.Cooking, npc.Animals).WithRent(3)),
-						g.NPCFactory.NewNPC(271, nil, 16*28, 16*11,
-							&common.Position{X: 16 * 17, Y: 16 * 11},
+						g.NPCFactory.NewNPC(271, nil, getPositionAvailable(),
 							npc.WithCharacteristic(npc.Extrovert, npc.Cooking, npc.Animals, npc.Reading).WithRent(3)),
-						g.NPCFactory.NewNPC(162, []int{389, 476, 312}, 16*31, 16*9,
-							&common.Position{X: 16 * 19, Y: 16 * 6},
+						g.NPCFactory.NewNPC(162, []int{389, 476, 312}, getPositionAvailable(),
 							npc.WithCharacteristic(npc.Adventurous, npc.Music, npc.Extrovert, npc.Stuff, npc.Reading).WithRent(4)),
 					},
 				},
 			},
 		}
-	case 2:
-		state.World["people"].AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101, 304}, 16*29, 16*8,
-			&common.Position{X: 16 * 18, Y: 20 * 6},
+	case 3:
+		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101, 304}, getPositionAvailable(),
 			npc.WithCharacteristic(npc.Sports, npc.Cooking, npc.Animals)))
-		state.World["people"].AddNPC(g.NPCFactory.NewNPC(2, []int{12, 104, 200}, 16*29, 16*5,
-			&common.Position{X: 16 * 18, Y: 20 * 6},
+		entrance.AddNPC(g.NPCFactory.NewNPC(2, []int{12, 104, 200}, getPositionAvailable(),
 			npc.WithCharacteristic(npc.Sports, npc.Music, npc.Sports)))
-		state.World["people"].AddNPC(g.NPCFactory.NewNPC(1, []int{13, 300, 400}, 16*29, 16*12,
-			&common.Position{X: 16 * 18, Y: 20 * 6},
+		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{13, 300, 400}, getPositionAvailable(),
 			npc.WithCharacteristic(npc.Sports, npc.Cooking, npc.Extrovert)))
+	case 5:
+		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101, 304}, getPositionAvailable(),
+			npc.WithCharacteristic(npc.Reading, npc.Competitive, npc.Animals)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(2, []int{12, 104, 200}, getPositionAvailable(),
+			npc.WithCharacteristic(npc.Money, npc.Animals, npc.Workaholic)))
 	}
 	state.Day = day
 	return state
