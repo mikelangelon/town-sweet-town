@@ -130,9 +130,10 @@ func (t *Town) SignalAction(signal house.Signal) {
 				return
 			}
 			t.state.Stats["money"] -= info.Cost
-			house := t.state.GameLogic.CreateHouse(signal.ID, info.Type)
-			house.House.Offset = signal.HousePlace
-			t.MapScene.Child = append(t.MapScene.Child, &house.House)
+			newHouse := t.state.GameLogic.CreateHouse(signal.ID, info.Type)
+			newHouse.House.Offset = signal.HousePlace
+			t.MapScene.Child = append(t.MapScene.Child, &newHouse.House)
+			t.state.World["town1"].Houses = append(t.state.World["town1"].Houses, &newHouse)
 		},
 	)
 }
