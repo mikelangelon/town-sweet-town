@@ -1,5 +1,6 @@
 package npc
 
+// TODO This should not be in npc package
 import (
 	"fmt"
 	"strings"
@@ -21,16 +22,6 @@ type Stats struct {
 	Security  int
 	Cultural  int
 	Health    int
-}
-
-func (s1 Stats) Merge(s2 Stats) Stats {
-	return Stats{
-		Happiness: s1.Happiness + s2.Happiness,
-		Security:  s1.Security + s2.Security,
-		Food:      s1.Food + s2.Food,
-		Cultural:  s1.Cultural + s2.Cultural,
-		Health:    s1.Health + s2.Health,
-	}
 }
 
 type Stat struct {

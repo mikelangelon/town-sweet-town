@@ -13,11 +13,23 @@ func (n NPCs) GetNPC(id string) *NPC {
 
 func (n NPCs) AllSteps() []StatStep {
 	var steps []StatStep
+	steps = append(steps, n.Money()...)
 	steps = append(steps, n.Food()...)
 	steps = append(steps, n.Cultural()...)
 	steps = append(steps, n.Health()...)
 	steps = append(steps, n.Security()...)
 	steps = append(steps, n.Happiness()...)
+	return steps
+}
+
+func (n NPCs) Money() []StatStep {
+	var steps []StatStep
+	for _, v := range n {
+		m := v.Chars.charLevelMap()
+		if v1, ok := m[Rent]; ok {
+			steps = addSteps(steps, v1, &v.ID, Money, "Rent")
+		}
+	}
 	return steps
 }
 func (n NPCs) Food() []StatStep {

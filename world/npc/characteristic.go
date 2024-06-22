@@ -36,6 +36,8 @@ func (c Chars) AsPhrases() []string {
 				continue
 			}
 			phrases = append(phrases, "I'm pessimist.")
+		case Rent:
+			phrases = append(phrases, fmt.Sprintf("I can pay %d coins as rent", v.Level))
 		default:
 			var phrase = "I"
 			if v.Level > 3 {
@@ -49,7 +51,13 @@ func (c Chars) AsPhrases() []string {
 	return phrases
 }
 
-func AddHappyCharacteristics(values ...string) Chars {
+func (c Chars) WithRent(rent int64) Chars {
+	return append(c, Characteristic{
+		Name:  Rent,
+		Level: rent,
+	})
+}
+func WithCharacteristic(values ...string) Chars {
 	var chs []Characteristic
 	for _, v := range values {
 		chs = append(chs, Characteristic{
@@ -69,6 +77,7 @@ func (c Chars) charLevelMap() map[string]int {
 }
 
 const (
+	Rent        = "Rent"
 	Extrovert   = "Extrovert"
 	Competitive = "Competitive"
 	Optimistic  = "Optimistic"

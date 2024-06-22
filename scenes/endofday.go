@@ -38,8 +38,10 @@ func (e *endOfDay) Update() {
 			switch name {
 			case npc.Security, npc.Health, npc.Cultural, npc.Happiness:
 				e.mapProgress[name].SetCurrent(e.stats[name])
-			case npc.Money, npc.Food:
+			case npc.Food:
 				e.mapStats[name].Label = fmt.Sprintf("Food: %d", e.stats[name])
+			case npc.Money:
+				e.mapStats[name].Label = fmt.Sprintf("Money: %d", e.stats[name])
 			}
 			e.endOfDayIndex++
 		} else {
@@ -101,13 +103,12 @@ func createShowEndOfDay(npcs npc.NPCs, day int, stats map[string]int) *endOfDay 
 	label1 := widget.NewText(
 		widget.TextOpts.Text(fmt.Sprintf("Day %d - Results", day), face, color.White),
 	)
-	lRent := widget.NewText(
-		widget.TextOpts.Text(moneyText(stats[npc.Money]), face, color.White),
-	)
 	e.stats = stats
 	e.mapStats = make(map[string]*widget.Text)
 	e.mapProgress = make(map[string]*widget.ProgressBar)
-
+	e.mapStats[npc.Money] = widget.NewText(
+		widget.TextOpts.Text(moneyText(stats[npc.Money]), face, color.White),
+	)
 	e.mapStats[npc.Food] = widget.NewText(
 		widget.TextOpts.Text(foodText(stats[npc.Food]), face, color.White),
 	)
@@ -135,7 +136,7 @@ func createShowEndOfDay(npcs npc.NPCs, day int, stats map[string]int) *endOfDay 
 	rootContainer.AddChild(secondaryContainer)
 	secondaryContainer.AddChild(leftContainer)
 	secondaryContainer.AddChild(rightContainer)
-	leftContainer.AddChild(lRent)
+	leftContainer.AddChild(e.mapStats[npc.Money])
 	leftContainer.AddChild(lSecurity)
 	leftContainer.AddChild(e.mapProgress[npc.Security])
 	leftContainer.AddChild(lCultural)
