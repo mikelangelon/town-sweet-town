@@ -66,7 +66,7 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 							npc.WithCharacteristic(npc.Extrovert, npc.Cooking, npc.Animals, npc.Reading).WithRent(3)),
 						g.NPCFactory.NewNPC(162, []int{389, 476, 312}, 16*31, 16*9,
 							&common.Position{X: 16 * 19, Y: 16 * 6},
-							npc.WithCharacteristic(npc.Adventurous, npc.Music, npc.Adventurous, npc.Reading).WithRent(4)),
+							npc.WithCharacteristic(npc.Adventurous, npc.Music, npc.Extrovert, npc.Stuff, npc.Reading).WithRent(4)),
 					},
 				},
 			},
@@ -77,10 +77,10 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 			npc.WithCharacteristic(npc.Sports, npc.Cooking, npc.Animals)))
 		state.World["people"].AddNPC(g.NPCFactory.NewNPC(2, []int{12, 104, 200}, 16*29, 16*5,
 			&common.Position{X: 16 * 18, Y: 20 * 6},
-			npc.WithCharacteristic(npc.Sports, npc.Cooking, npc.Animals)))
+			npc.WithCharacteristic(npc.Sports, npc.Music, npc.Sports)))
 		state.World["people"].AddNPC(g.NPCFactory.NewNPC(1, []int{13, 300, 400}, 16*29, 16*12,
 			&common.Position{X: 16 * 18, Y: 20 * 6},
-			npc.WithCharacteristic(npc.Sports, npc.Cooking, npc.Animals)))
+			npc.WithCharacteristic(npc.Sports, npc.Cooking, npc.Extrovert)))
 	}
 	state.Day = day
 	return state

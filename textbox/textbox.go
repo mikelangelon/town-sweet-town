@@ -115,10 +115,10 @@ func (c *TextBox) drawBackground() *ebiten.Image {
 func drawText(img *ebiten.Image, txt string, op *text.DrawOptions) (int, int) {
 	font := guiFont(20)
 	w, h := text.Measure(txt, font, 0)
+	op.GeoM.Translate(10, h)
 	for _, v := range strings.Split(txt, "\n") {
-		op.GeoM.Translate(10, h)
 		text.Draw(img, v, font, op)
-		h += 10
+		op.GeoM.Translate(0, 20)
 	}
 
 	return int(w), int(h)

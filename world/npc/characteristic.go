@@ -36,6 +36,12 @@ func (c Chars) AsPhrases() []string {
 				continue
 			}
 			phrases = append(phrases, "I'm pessimist.")
+		case Adventurous:
+			if v.Level > 3 {
+				phrases = append(phrases, "I'm adventurous.")
+				continue
+			}
+			phrases = append(phrases, "I'm a coward.")
 		case Rent:
 			phrases = append(phrases, fmt.Sprintf("I can pay %d coins as rent", v.Level))
 		default:

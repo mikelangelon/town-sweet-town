@@ -8,14 +8,17 @@ import (
 	"time"
 )
 
+const groupPhases = 3
+
 type NPC struct {
 	graphics.Char
-	Move    *common.Position
-	moving  bool
-	Phrases []string
-	Chars   Chars
-	House   *house.House
-	DayIn   int
+	Move       *common.Position
+	moving     bool
+	Phrases    []string
+	Chars      Chars
+	House      *house.House
+	DayIn      int
+	alreadyMet bool
 }
 
 func (n *NPC) SetHouse(house *house.House, dayIn int) {
@@ -44,11 +47,22 @@ func (n *NPC) Update() error {
 }
 
 func (n *NPC) Talk(day int) []string {
-	var result = []string{
-		fmt.Sprintf("My name is %s", n.ID),
+	var result []string
+	if !n.alreadyMet {
+		result = append(result, fmt.Sprintf("My name is %s", n.ID))
+		n.alreadyMet = true
 	}
-	for _, v := range n.Chars.AsPhrases() {
-		result = append(result, v)
+	var group string
+	for i, v := range n.Chars.AsPhrases() {
+		if (i+1)%(groupPhases+1) == 0 {
+			result = append(result, group)
+			group = ""
+			continue
+		}
+		group += v + "\n"
+	}
+	if len(group) > 0 {
+		result = append(result, group)
 	}
 	if n.House == nil {
 		result = append(result, "Could I live in one house, please?")
