@@ -180,7 +180,7 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 	if t.state.Status == InitialState {
 		t.state.Status = Playing
 		t.state.Stats = make(map[string]int)
-		t.state.Stats[npc.Money] = 13
+		t.state.Stats[npc.Money] = 20
 		t.state.Stats[npc.Happiness] = 10
 		t.state.Stats[npc.Security] = 15
 		t.state.Stats[npc.Food] = 10
