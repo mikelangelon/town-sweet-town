@@ -12,7 +12,6 @@ import (
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
 	"image/color"
-	"time"
 )
 
 type Town struct {
@@ -170,6 +169,10 @@ func (t *Town) KickOutHouse(npc *npc.NPC) {
 		options, answerFunc)
 }
 
+func (t *Town) PreTransition(destination stagehand.Scene[State]) State {
+	return t.state
+}
+
 func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 	t.BaseScene.Load(st, sm)
 
@@ -188,10 +191,9 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 		t.state.Day = 1
 		return
 	}
+}
 
-	timer := time.NewTimer(500 * time.Millisecond)
-	go func() {
-		<-timer.C
-		t.state.Player.X, t.state.Player.Y = t.TransitionPoints.Position.X, t.TransitionPoints.Position.Y
-	}()
+func (t *Town) PostTransition(st State, original stagehand.Scene[State]) {
+	t.state.Player.X, t.state.Player.Y = t.TransitionPoints.Position.X, t.TransitionPoints.Position.Y
+	t.state.Status = Playing
 }

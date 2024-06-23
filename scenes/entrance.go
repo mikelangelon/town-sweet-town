@@ -7,7 +7,6 @@ import (
 	"github.com/mikelangelon/town-sweet-town/textbox"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
-	"time"
 )
 
 type Entrance struct {
@@ -73,9 +72,13 @@ func (e *Entrance) TalkToNPC(npc *npc.NPC) {
 
 func (e *Entrance) Load(st State, sm stagehand.SceneController[State]) {
 	e.BaseScene.Load(st, sm)
-	timer := time.NewTimer(500 * time.Millisecond)
-	go func() {
-		<-timer.C
-		e.state.Player.X, e.state.Player.Y = e.TransitionPoints.Position.X, e.TransitionPoints.Position.Y
-	}()
+}
+
+func (e *Entrance) PreTransition(destination stagehand.Scene[State]) State {
+	return e.state
+}
+
+func (e *Entrance) PostTransition(st State, original stagehand.Scene[State]) {
+	e.state.Player.X, e.state.Player.Y = e.TransitionPoints.Position.X, e.TransitionPoints.Position.Y
+	e.state.Status = Playing
 }

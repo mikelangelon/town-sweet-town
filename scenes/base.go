@@ -77,6 +77,7 @@ func (bs *BaseScene) Update() (bool, error) {
 	x, y := bs.state.Player.X, bs.state.Player.Y
 	if x >= v.Position.X && x < v.Position.X+16 &&
 		y >= v.Position.Y && y < v.Position.Y+16 {
+		bs.state.Status = Transitioning
 		bs.sm.SwitchWithTransition(v.Scene, stagehand.NewTicksTimedSlideTransition[State](v.Direction, time.Second*time.Duration(1)))
 		return false, nil
 	}
