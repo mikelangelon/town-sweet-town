@@ -15,7 +15,7 @@ type Entrance struct {
 
 func NewEntrance(id string, mapScene *graphics.MapScene) *Entrance {
 	return &Entrance{
-		BaseScene{ID: id, MapScene: mapScene},
+		BaseScene{ID: id, MapScene: mapScene, ui: NewHUI()},
 	}
 }
 

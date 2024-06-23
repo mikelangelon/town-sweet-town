@@ -23,7 +23,7 @@ type Town struct {
 
 func NewTown(id string, mapScene *graphics.MapScene) *Town {
 	return &Town{
-		BaseScene: BaseScene{ID: id, MapScene: mapScene},
+		BaseScene: BaseScene{ID: id, MapScene: mapScene, ui: NewHUI()},
 	}
 }
 

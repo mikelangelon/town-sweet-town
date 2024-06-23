@@ -15,15 +15,6 @@ const (
 	Money     = "money"
 )
 
-type Stats struct {
-	Food      int
-	Money     int
-	Happiness int
-	Security  int
-	Cultural  int
-	Health    int
-}
-
 type Stat struct {
 	name  string
 	steps []StatStep

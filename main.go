@@ -58,7 +58,6 @@ func main() {
 	state := gameLogic.NextDay(scenes.State{})
 	people1Scene := scenes.NewEntrance("people", people1)
 	town1Scene := scenes.NewTown("town1", town1)
-	town1Scene.SetupUI()
 	town1Scene.TransitionPoints = scenes.Transition{
 		Position:  common.Position{X: 24 * 16, Y: 6 * 16},
 		Scene:     people1Scene,
