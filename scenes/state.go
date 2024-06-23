@@ -48,4 +48,5 @@ const (
 	Transitioning
 	DayEnding
 	DayStarting
+	Pause
 )

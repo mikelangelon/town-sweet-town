@@ -53,6 +53,13 @@ func (bs *BaseScene) Update() (bool, error) {
 	if bs.ui != nil {
 		bs.ui.Update(bs.state.Stats)
 	}
+
+	if bs.state.Status == Pause {
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			bs.state.Status = Playing
+			return true, nil
+		}
+	}
 	if bs.state.Status != Playing {
 		return true, nil
 	}
@@ -101,6 +108,13 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 		bs.ui.ui.Draw(bg)
 		screen.DrawImage(bg, op)
 	}
+	if bs.state.Status == Pause {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(100, 100)
+		bg := ebiten.NewImage(common.ScreenWidth-200, common.ScreenHeight-200)
+		bg.Fill(color.RGBA{50, 50, 50, 150})
+		screen.DrawImage(bg, op)
+	}
 }
 
 func (bs *BaseScene) Load(st State, sm stagehand.SceneController[State]) {
@@ -147,6 +161,9 @@ func (bs *BaseScene) checkActionExecuted() *resolv.Collision {
 	if collision := player.Check(-16, 0); collision != nil {
 		return collision
 	}
+	// If anything, show pause menu
+	bs.state.Status = Pause
+
 	return nil
 }
 
