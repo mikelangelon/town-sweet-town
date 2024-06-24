@@ -13,6 +13,7 @@ import (
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
 	"image/color"
+	"time"
 )
 
 type Town struct {
@@ -20,6 +21,8 @@ type Town struct {
 
 	endOfDay        *endOfDay
 	TransitionSleep uint8
+	// For now, only for initial presentation
+	Ack *time.Time
 }
 
 func NewTown(id string, mapScene *graphics.MapScene) *Town {
@@ -39,7 +42,36 @@ func (t *Town) Update() error {
 
 		return nil
 	}
-
+	if t.state.Status == InitialState {
+		_, err := t.playerUpdate()
+		if err != nil {
+			return err
+		}
+	}
+	if t.state.Status == InitialState && t.Ack != nil && time.Since(*t.Ack) > 5*time.Second {
+		t.state.Status = InitExplanation
+		t.Text.Show([]string{
+			"Hello there! \nLet me introduce you a bit on the rules of this world. \nYou can move with the arrows\nPress ENTER to do an action.\n(As passing this dialog)",
+			"You are the architect of this town,\nyour goal is to build a happy community in 2 weeks.",
+			"To build a house, press ENTER next to a signal post.\nYou will need money for it.\n(See top values)",
+			"To recruit villagers for your town,\ngo to the east.",
+			"Every 2 days new people will come there.",
+			"To end the day,\npress ENTER next to the fire.",
+			"Villagers have their own characteristics, \ntheir combinations would make improve or decrease \nyour town stats.",
+			"There are some active rules that you will need to be aware.\nPress ENTER to see them.",
+			"Every day new rules\nwill come up!",
+			"You have 2 weeks! Don't fail me!",
+		})
+	}
+	if t.state.Status == InitExplanation && !t.Text.Visible() {
+		time.Sleep(500 * time.Millisecond)
+		t.Text.Show([]string{"And put some clothes on!", "I have faith in you!"})
+		t.state.Status = NoClothes
+	}
+	if t.state.Status == NoClothes && !t.Text.Visible() {
+		t.state.Status = Playing
+		t.state = t.state.GameLogic.ChangePlayer(t.state)
+	}
 	if t.endOfDay != nil {
 		t.endOfDay.Update()
 		if t.endOfDay.done {
@@ -198,7 +230,6 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 	}
 
 	if t.state.Status == InitialState {
-		t.state.Status = Playing
 		t.state.Stats = make(map[string]int)
 		t.state.Stats[npc.Money] = 20
 		t.state.Stats[npc.Happiness] = 10
@@ -206,6 +237,9 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 		t.state.Stats[npc.Food] = 10
 		t.state.Stats[npc.Health] = 30
 		t.state.Day = 1
+
+		now := time.Now()
+		t.Ack = &now
 		return
 	}
 }

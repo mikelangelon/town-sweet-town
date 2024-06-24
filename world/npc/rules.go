@@ -30,6 +30,14 @@ var (
 		},
 	}
 
+	NoFood = Rule{
+		Name:        "No food",
+		Description: "-20 Health if there is no food",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			return addSteps(steps, -2*(len(n)+1), nil, Food, fmt.Sprintf("%d Villagers + yourself", len(n)))
+		},
+	}
+
 	RentRule = Rule{
 		Name:        "Rent",
 		Description: "Every villager pays their rent (+X money)",

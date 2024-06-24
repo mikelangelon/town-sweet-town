@@ -27,6 +27,11 @@ func (g GameLogic) CreateHouse(id string, typ int) house.House {
 	return house.House{ID: id, House: *g.HouseFactory.Houses[typ]}
 }
 
+func (g GameLogic) ChangePlayer(state scenes.State) scenes.State {
+	char := g.CharFactory.NewChar(1, []int{10, 111, 304}, 16*6, 16*6)
+	state.Player.Stuff = char.Stuff
+	return state
+}
 func (g GameLogic) NextDay(state scenes.State) scenes.State {
 	entrance := state.World["people"]
 	day := state.Day + 1
@@ -49,7 +54,7 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 
 	switch day {
 	case 1:
-		char := g.CharFactory.NewChar(1, []int{10, 111, 304}, 16*6, 16*6)
+		char := g.CharFactory.NewChar(1, nil, 16*6, 16*6)
 
 		fire := world.Fire{Char: g.FancyTownFactory.NewChar(470, nil, 16*6, 16*10)}
 		sWest := house.NewSignal(

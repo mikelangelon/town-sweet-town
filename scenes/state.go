@@ -20,6 +20,7 @@ type Brainer interface {
 	NextDay(state State) State
 	CreateHouse(id string, typ int) house.House
 	GetRuler() npc.RuleApplier
+	ChangePlayer(state State) State
 }
 
 type SceneMap struct {
@@ -45,6 +46,8 @@ func (s *SceneMap) RemoveNPC(ID string) {
 const (
 	Menu = iota
 	InitialState
+	InitExplanation
+	NoClothes
 	Playing
 	Transitioning
 	DayEnding
