@@ -61,19 +61,9 @@ func main() {
 		FancyTownFactory: fancyTownFactory,
 		TinyTownFactory:  tinyTownFactory,
 		HouseFactory:     houseFactory,
-		RulesApplier: npc.RuleApplier{Rules: []npc.Rule{
+		RulesApplier: &npc.RuleApplier{Rules: []npc.Rule{
 			npc.RentRule,
 			npc.EatingRule,
-			npc.CookingBonus,
-			npc.AdventurousThief,
-			npc.CompetitionTooMuch,
-			npc.EatingTooMuch,
-			npc.GoodCulture,
-			npc.WorkTooMuch,
-			npc.HealthyGuy,
-			npc.OptimisticThief,
-			npc.AnimalLovers,
-			npc.AnimalConflict,
 		}},
 	}
 	state := gameLogic.NextDay(scenes.State{})

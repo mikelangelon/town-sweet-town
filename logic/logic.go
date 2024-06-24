@@ -16,11 +16,11 @@ type GameLogic struct {
 	TinyTownFactory  *graphics.CharFactory
 	CharFactory      *graphics.CharFactory
 	FancyTownFactory *graphics.CharFactory
-	RulesApplier     npc.RuleApplier
+	RulesApplier     *npc.RuleApplier
 }
 
 func (g GameLogic) GetRuler() npc.RuleApplier {
-	return g.RulesApplier
+	return *g.RulesApplier
 }
 
 func (g GameLogic) CreateHouse(id string, typ int) house.House {
@@ -35,7 +35,6 @@ func (g GameLogic) ChangePlayer(state scenes.State) scenes.State {
 func (g GameLogic) NextDay(state scenes.State) scenes.State {
 	entrance := state.World["people"]
 	day := state.Day + 1
-
 	const offsetX = 13
 	const offsetY = 4
 	var positionAvailable []common.Position
@@ -95,10 +94,16 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 				},
 			},
 		}
+	case 2:
+		g.RulesApplier.Rules = append(g.RulesApplier.Rules, npc.RandomRule())
+		g.RulesApplier.Rules = append(g.RulesApplier.Rules, npc.RandomRule())
 	case 3:
 		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101, 304}, getPositionAvailable(), npc.WithRandom(4)))
 		entrance.AddNPC(g.NPCFactory.NewNPC(54, []int{12, 104, 561}, getPositionAvailable(), npc.WithRandom(4)))
 		entrance.AddNPC(g.NPCFactory.NewNPC(109, []int{13, 300, 197}, getPositionAvailable(), npc.WithRandom(4)))
+	case 4:
+		g.RulesApplier.Rules = append(g.RulesApplier.Rules, npc.RandomRule())
+		g.RulesApplier.Rules = append(g.RulesApplier.Rules, npc.RandomRule())
 	case 5:
 		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101}, getPositionAvailable(), npc.WithRandom(5)))
 		entrance.AddNPC(g.NPCFactory.NewNPC(0, []int{12, 104, 478}, getPositionAvailable(), npc.WithRandom(5)))

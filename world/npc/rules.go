@@ -3,6 +3,7 @@ package npc
 import (
 	"fmt"
 	"github.com/mikelangelon/town-sweet-town/world"
+	"math/rand"
 )
 
 type RuleApplier struct {
@@ -269,3 +270,23 @@ var (
 		},
 	}
 )
+
+var AllAvailableRules = []Rule{
+	CookingBonus,
+	AdventurousThief,
+	CompetitionTooMuch,
+	EatingTooMuch,
+	GoodCulture,
+	WorkTooMuch,
+	HealthyGuy,
+	OptimisticThief,
+	AnimalLovers,
+	AnimalConflict,
+}
+
+func RandomRule() Rule {
+	index := rand.Intn(len(AllAvailableRules))
+	rule := AllAvailableRules[index]
+	AllAvailableRules = append(AllAvailableRules[0:index], AllAvailableRules[index+1:]...)
+	return rule
+}
