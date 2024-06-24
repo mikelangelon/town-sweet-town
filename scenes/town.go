@@ -36,10 +36,18 @@ func (t *Town) Update() error {
 		t.rulesUI.ui.Update()
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			t.state.Status = Playing
 			t.rulesUI = nil
+			t.goalsUI = NewGoals(t.state.Goals)
 		}
 
+		return nil
+	}
+	if t.goalsUI != nil {
+		t.goalsUI.ui.Update()
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			t.state.Status = Playing
+			t.goalsUI = nil
+		}
 		return nil
 	}
 	if t.state.Status == InitialState {
@@ -71,6 +79,7 @@ func (t *Town) Update() error {
 	if t.state.Status == NoClothes && !t.Text.Visible() {
 		t.state.Status = Playing
 		t.state = t.state.GameLogic.ChangePlayer(t.state)
+		t.goalsUI = NewGoals(t.state.Goals)
 	}
 	if t.endOfDay != nil {
 		t.endOfDay.Update()
@@ -239,6 +248,28 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 		t.state.Day = 1
 
 		now := time.Now()
+		t.state.Goals = []world.Goal{
+			{
+				Day:       5,
+				Stat:      npc.Cultural,
+				Value:     30,
+				GiftStat:  npc.Food,
+				GiftValue: 10,
+			},
+			{
+				Day:       9,
+				Stat:      npc.Health,
+				Value:     50,
+				GiftStat:  npc.Security,
+				GiftValue: 10,
+			},
+			{
+				Day:       14,
+				Stat:      npc.Happiness,
+				Value:     100,
+				Mandatory: true,
+			},
+		}
 		t.Ack = &now
 		return
 	}

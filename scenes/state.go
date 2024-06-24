@@ -13,6 +13,7 @@ type State struct {
 	World     map[string]*SceneMap
 	Stats     map[string]int
 	Day       int
+	Goals     []world.Goal
 	GameLogic Brainer
 }
 

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/mikelangelon/town-sweet-town/logic"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/gofont/goregular"
 
 	"github.com/joelschutz/stagehand"
 	"github.com/mikelangelon/town-sweet-town/assets"
@@ -48,6 +51,10 @@ func main() {
 		slog.Error("crash parseTileSet", "error", err)
 		return
 	}
+	common.BigFont, _ = loadFont(30)
+	common.NormalFont, _ = loadFont(20)
+	common.TinyFont, _ = loadFont(16)
+	common.MegaTinyFont, _ = loadFont(12)
 	gameLogic := logic.GameLogic{
 		NPCFactory:       npcFactory,
 		CharFactory:      charFactory,
@@ -87,4 +94,17 @@ func main() {
 	if err := ebiten.RunGame(sm); err != nil {
 		slog.Error("something went wrong", "err", err)
 	}
+}
+
+func loadFont(size float64) (font.Face, error) {
+	ttfFont, err := truetype.Parse(goregular.TTF)
+	if err != nil {
+		return nil, err
+	}
+
+	return truetype.NewFace(ttfFont, &truetype.Options{
+		Size:    size,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	}), nil
 }

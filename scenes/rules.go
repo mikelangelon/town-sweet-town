@@ -4,6 +4,7 @@ import (
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"image/color"
 	"math"
@@ -14,8 +15,6 @@ type ruleUI struct {
 }
 
 func NewRulesUI(rules []npc.Rule) *ruleUI {
-	face, _ := loadFont(20)
-	face2, _ := loadFont(12)
 	rootContainer := widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
@@ -51,10 +50,10 @@ func NewRulesUI(rules []npc.Rule) *ruleUI {
 			widget.RowLayoutOpts.Spacing(10),
 		)))
 		label := widget.NewText(
-			widget.TextOpts.Text(v.Name, face, color.White),
+			widget.TextOpts.Text(v.Name, common.NormalFont, color.White),
 		)
 		label2 := widget.NewText(
-			widget.TextOpts.Text(v.Description, face2, color.NRGBA{200, 250, 250, 255}),
+			widget.TextOpts.Text(v.Description, common.MegaTinyFont, color.NRGBA{200, 250, 250, 255}),
 			widget.TextOpts.Insets(widget.NewInsetsSimple(20)))
 		rule.AddChild(label)
 		rule.AddChild(label2)
@@ -115,7 +114,7 @@ func NewRulesUI(rules []npc.Rule) *ruleUI {
 	//Add the slider to the second slot in the root container
 	secondaryContainer.AddChild(vSlider)
 	rootContainer.AddChild(widget.NewText(
-		widget.TextOpts.Text("Active rules", face, color.White),
+		widget.TextOpts.Text("Active rules", common.BigFont, color.White),
 	))
 	rootContainer.AddChild(secondaryContainer)
 	return &ruleUI{

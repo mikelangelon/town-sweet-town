@@ -39,6 +39,7 @@ type BaseScene struct {
 	Text    textbox.TextBox
 	ui      *hui
 	rulesUI *ruleUI
+	goalsUI *goalsUI
 }
 
 func (bs *BaseScene) Layout(w, h int) (int, int) {
@@ -93,6 +94,15 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 		bg := ebiten.NewImage(common.ScreenWidth-100, common.ScreenHeight-100)
 		bg.Fill(color.RGBA{50, 50, 50, 150})
 		bs.rulesUI.ui.Draw(bg)
+		screen.DrawImage(bg, op)
+		return
+	}
+	if bs.goalsUI != nil {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(50, 50)
+		bg := ebiten.NewImage(common.ScreenWidth-100, common.ScreenHeight-100)
+		bg.Fill(color.RGBA{50, 50, 50, 150})
+		bs.goalsUI.ui.Draw(bg)
 		screen.DrawImage(bg, op)
 		return
 	}
