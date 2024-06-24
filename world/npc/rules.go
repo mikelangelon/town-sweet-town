@@ -133,6 +133,27 @@ var (
 		},
 	}
 
+	HappyCooperation = Rule{
+		Name:        "Happy cooperation",
+		Description: "+10 happiness if there are more than 2 villager cooperative",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			var cooperation int
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Competitive]; ok1 {
+					switch v1.Love() {
+					case Hate:
+						cooperation++
+					}
+				}
+			}
+			if cooperation > 1 {
+				steps = addSteps(steps, 10, nil, Happiness, "Happy cooperation")
+			}
+			return steps
+		},
+	}
+
 	BadCulture = Rule{
 		Name:        "Bad culture",
 		Description: "-4 culture for every villager that hates Reading or Music",
@@ -158,6 +179,66 @@ var (
 				m := v.Chars.charMap()
 				if v1, ok1 := m[Workaholic]; ok1 && v1.Love() == Love {
 					steps = addSteps(steps, -8, &v.ID, Health, "Works too much")
+				}
+			}
+			return steps
+		},
+	}
+
+	WorkingPower = Rule{
+		Name:        "WorkingPower",
+		Description: "+3 coins for every villager loving to work",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Workaholic]; ok1 && v1.Love() == Love {
+					steps = addSteps(steps, 5, &v.ID, Money, "Works too much")
+				}
+			}
+			return steps
+		},
+	}
+
+	ExtrovertPower = Rule{
+		Name:        "Extrovert Power",
+		Description: "+3 for extrovert person",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Workaholic]; ok1 && v1.Love() == Love {
+					steps = addSteps(steps, 5, &v.ID, Health, "Works too much")
+				}
+			}
+			return steps
+		},
+	}
+
+	IntrovertCulture = Rule{
+		Name:        "Introvert Culture",
+		Description: "+4 Culture for every",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				m := v.Chars.charMap()
+				v1, ok1 := m[Extrovert]
+				v2, ok2 := m[Reading]
+				v3, ok3 := m[Music]
+				if ok1 && v1.Love() == Hate && ((ok2 && v2.Love() == Love) || (ok3 && v3.Love() == Love)) {
+					steps = addSteps(steps, 4, &v.ID, Cultural, "Introvert culture")
+
+				}
+			}
+			return steps
+		},
+	}
+
+	CultureLeak = Rule{
+		Name:        "Culture Leak",
+		Description: "-3 Culture for every person not loving Reading or Music",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Cultural]; ok1 && v1.Love() != Love {
+					steps = addSteps(steps, -3, &v.ID, Cultural, "Culture Leak")
 				}
 			}
 			return steps
@@ -269,6 +350,63 @@ var (
 			return steps
 		},
 	}
+
+	BravenessConflict = Rule{
+		Name:        "Braveness Conflict",
+		Description: "-10 Happiness when there are adventorous and coward villagers",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			var animals bool
+			var animalHaters bool
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Animals]; ok1 {
+					switch v1.Love() {
+					case Love:
+						animals = true
+					case Hate:
+						animalHaters = true
+					}
+				}
+			}
+			if animals && animalHaters {
+				steps = addSteps(steps, -10, nil, Happiness, "Braveness Conflict")
+			}
+			return steps
+		},
+	}
+
+	HappyCapitalism = Rule{
+		Name:        "Happy capitalism",
+		Description: "+12 happiness for each villager loving stuff",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			var result []bool
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Stuff]; ok1 && v1.Love() == Love {
+					result = append(result, true)
+				}
+			}
+			if len(result) > 1 {
+				steps = addSteps(steps, 12, nil, Happiness, "Happy capitalism")
+			}
+			return steps
+		},
+	}
+
+	UnethicalFood = Rule{
+		Name:        "Unethical food",
+		Description: "+10 food for every villager that hates animals",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Animals]; ok1 && v1.Love() == Hate {
+					steps = addSteps(steps, 8, &v.ID, Food, "Unethical food")
+				}
+			}
+
+			return steps
+		},
+	}
 )
 
 var AllAvailableRules = []Rule{
@@ -282,6 +420,13 @@ var AllAvailableRules = []Rule{
 	OptimisticThief,
 	AnimalLovers,
 	AnimalConflict,
+	HappyCooperation,
+	UnethicalFood,
+	HappyCapitalism,
+	BravenessConflict,
+	CultureLeak,
+	IntrovertCulture,
+	ExtrovertPower,
 }
 
 func RandomRule() Rule {
