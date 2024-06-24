@@ -50,10 +50,10 @@ func (e *endOfDay) Update() {
 	}
 }
 
-func createShowEndOfDay(npcs npc.NPCs, day int, stats map[string]int) *endOfDay {
+func createShowEndOfDay(applier npc.RuleApplier, npcs npc.NPCs, day int, stats map[string]int) *endOfDay {
 
 	var e endOfDay
-	e.endOfDaySteps = npcs.AllSteps()
+	e.endOfDaySteps = applier.ApplyRules(npcs)
 	t := time.Now()
 	e.endOfDayTimer = &t
 

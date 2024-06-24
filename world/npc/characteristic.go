@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+const (
+	Love = "loves"
+	Hate = "hates"
+	Meh  = "doesn't care about"
+)
+
 type Characteristic struct {
 	Name  string
 	Level int64
@@ -46,16 +52,19 @@ func (c Chars) AsPhrases() []string {
 		case Rent:
 			phrases = append(phrases, fmt.Sprintf("I can pay %d coins as rent", v.Level))
 		default:
-			var phrase = "I"
-			if v.Level > 3 {
-				phrase += " love "
-			} else {
-				phrase += " hate "
-			}
-			phrases = append(phrases, fmt.Sprintf("%s%s", phrase, strings.ToLower(v.Name)))
+			phrases = append(phrases, fmt.Sprintf("I %s %s", v.Love(), strings.ToLower(v.Name)))
 		}
 	}
 	return phrases
+}
+
+func (c Characteristic) Love() string {
+	if c.Level > 3 {
+		return Love
+	} else if c.Level < 3 {
+		return Hate
+	}
+	return Meh
 }
 
 func (c Chars) WithRent(rent int64) Chars {
@@ -79,6 +88,14 @@ func (c Chars) charLevelMap() map[string]int {
 	var m = make(map[string]int, len(c))
 	for _, k := range c {
 		m[k.Name] = int(k.Level)
+	}
+	return m
+}
+
+func (c Chars) charMap() map[string]Characteristic {
+	var m = make(map[string]Characteristic, len(c))
+	for _, k := range c {
+		m[k.Name] = k
 	}
 	return m
 }

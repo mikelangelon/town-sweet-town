@@ -36,8 +36,9 @@ type BaseScene struct {
 	TransitionPoints Transition
 
 	//UI
-	Text textbox.TextBox
-	ui   *hui
+	Text    textbox.TextBox
+	ui      *hui
+	rulesUI *ruleUI
 }
 
 func (bs *BaseScene) Layout(w, h int) (int, int) {
@@ -52,13 +53,6 @@ func (bs *BaseScene) Update() (bool, error) {
 	}
 	if bs.ui != nil {
 		bs.ui.Update(bs.state.Stats)
-	}
-
-	if bs.state.Status == Pause {
-		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			bs.state.Status = Playing
-			return true, nil
-		}
 	}
 	if bs.state.Status != Playing {
 		return true, nil
@@ -93,6 +87,15 @@ func (bs *BaseScene) Update() (bool, error) {
 
 func (bs *BaseScene) Draw(screen *ebiten.Image) {
 	bs.MapScene.Draw(screen)
+	if bs.rulesUI != nil {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(50, 50)
+		bg := ebiten.NewImage(common.ScreenWidth-100, common.ScreenHeight-100)
+		bg.Fill(color.RGBA{50, 50, 50, 150})
+		bs.rulesUI.ui.Draw(bg)
+		screen.DrawImage(bg, op)
+		return
+	}
 	bs.state.Player.Draw(screen)
 	for _, v := range bs.NPCs {
 		v.Draw(screen)
@@ -106,13 +109,6 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(500, 0)
 		bg := ebiten.NewImage(300, 60)
 		bs.ui.ui.Draw(bg)
-		screen.DrawImage(bg, op)
-	}
-	if bs.state.Status == Pause {
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(100, 100)
-		bg := ebiten.NewImage(common.ScreenWidth-200, common.ScreenHeight-200)
-		bg.Fill(color.RGBA{50, 50, 50, 150})
 		screen.DrawImage(bg, op)
 	}
 }
@@ -163,6 +159,7 @@ func (bs *BaseScene) checkActionExecuted() *resolv.Collision {
 	}
 	// If anything, show pause menu
 	bs.state.Status = Pause
+	bs.rulesUI = NewRulesUI(bs.state.GameLogic.GetRuler().Rules)
 
 	return nil
 }

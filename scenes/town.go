@@ -3,6 +3,7 @@ package scenes
 import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/joelschutz/stagehand"
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
@@ -28,6 +29,17 @@ func NewTown(id string, mapScene *graphics.MapScene) *Town {
 }
 
 func (t *Town) Update() error {
+	if t.rulesUI != nil {
+		t.rulesUI.ui.Update()
+
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			t.state.Status = Playing
+			t.rulesUI = nil
+		}
+
+		return nil
+	}
+
 	if t.endOfDay != nil {
 		t.endOfDay.Update()
 		if t.endOfDay.done {
@@ -40,6 +52,9 @@ func (t *Town) Update() error {
 	if err != nil {
 		return err
 	}
+	if t.rulesUI != nil {
+		return nil
+	}
 	if skip {
 		return nil
 	}
@@ -51,6 +66,7 @@ func (t *Town) Update() error {
 }
 
 func (t *Town) Draw(screen *ebiten.Image) {
+
 	t.BaseScene.Draw(screen)
 	if t.state.Status == DayEnding {
 		colorGoal := color.RGBA{10, 10, 10, t.TransitionSleep}
@@ -58,7 +74,7 @@ func (t *Town) Draw(screen *ebiten.Image) {
 			t.TransitionSleep++
 		} else {
 			if t.endOfDay == nil {
-				t.endOfDay = createShowEndOfDay(t.NPCs, t.state.Day, t.state.Stats)
+				t.endOfDay = createShowEndOfDay(t.state.GameLogic.GetRuler(), t.NPCs, t.state.Day, t.state.Stats)
 			}
 		}
 		op := &ebiten.DrawImageOptions{}
@@ -88,6 +104,7 @@ func (t *Town) Draw(screen *ebiten.Image) {
 		t.endOfDay.ui.Draw(bg)
 		screen.DrawImage(bg, op)
 	}
+
 }
 
 func (t *Town) Action(collision *resolv.Collision) {

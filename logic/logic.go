@@ -16,6 +16,11 @@ type GameLogic struct {
 	TinyTownFactory  *graphics.CharFactory
 	CharFactory      *graphics.CharFactory
 	FancyTownFactory *graphics.CharFactory
+	RulesApplier     npc.RuleApplier
+}
+
+func (g GameLogic) GetRuler() npc.RuleApplier {
+	return g.RulesApplier
 }
 
 func (g GameLogic) CreateHouse(id string, typ int) house.House {

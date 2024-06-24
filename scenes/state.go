@@ -19,6 +19,7 @@ type State struct {
 type Brainer interface {
 	NextDay(state State) State
 	CreateHouse(id string, typ int) house.House
+	GetRuler() npc.RuleApplier
 }
 
 type SceneMap struct {
