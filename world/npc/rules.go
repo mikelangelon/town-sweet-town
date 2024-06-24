@@ -1,6 +1,9 @@
 package npc
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/mikelangelon/town-sweet-town/world"
+)
 
 type RuleApplier struct {
 	Rules []Rule
@@ -12,6 +15,38 @@ func (r RuleApplier) ApplyRules(n NPCs) []StatStep {
 		steps = v.Func(n, steps)
 	}
 	return steps
+}
+
+func (r RuleApplier) CheckGoals(goals []world.Goal, currentDay int, stats map[string]int) ([]StatStep, int) {
+	var endStatus = 0
+	for i, v := range goals {
+		if v.Day != currentDay {
+			continue
+		}
+		if stats[v.Stat] >= v.Value {
+			if v.Mandatory {
+				endStatus = 1
+			}
+			return []StatStep{
+				{
+					Name:  v.GiftStat,
+					Value: v.Value,
+					Text:  fmt.Sprintf("You made Goal %d! (Get to %s %d)", i+1, v.Stat, v.Value),
+				},
+			}, endStatus
+		}
+		if v.Mandatory {
+			endStatus = -1
+		}
+		return []StatStep{
+			{
+				Name:  v.GiftStat,
+				Value: v.Value,
+				Text:  fmt.Sprintf("You failed Goal %d! (Get to %s %d)", i+1, v.Stat, v.Value),
+			},
+		}, endStatus
+	}
+	return nil, endStatus
 }
 
 type Rule struct {

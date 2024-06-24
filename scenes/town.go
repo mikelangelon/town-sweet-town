@@ -50,11 +50,16 @@ func (t *Town) Update() error {
 		}
 		return nil
 	}
+	if t.state.Status == HappyEnd || t.state.Status == GameOver {
+		t.state.Status = InitialState
+		return nil
+	}
 	if t.state.Status == InitialState {
 		_, err := t.playerUpdate()
 		if err != nil {
 			return err
 		}
+		t.state.Status = Playing
 	}
 	if t.state.Status == InitialState && t.Ack != nil && time.Since(*t.Ack) > 5*time.Second {
 		t.state.Status = InitExplanation
@@ -84,11 +89,29 @@ func (t *Town) Update() error {
 	if t.endOfDay != nil {
 		t.endOfDay.Update()
 		if t.endOfDay.done {
+			step, end := t.state.GameLogic.GetRuler().CheckGoals(t.state.Goals, t.state.Day, t.state.Stats)
+			switch end {
+			case 0:
+				if step != nil {
+					t.Text.ShowAndQuestion([]string{step[0].Text}, nil, func(s string) {})
+					t.state.Stats[step[0].Name] = step[0].Value
+				}
+			case 1:
+				t.state.Status = HappyEnd
+				t.endOfDay = nil
+				return nil
+			case -1:
+				t.state.Status = GameOver
+				t.endOfDay = nil
+				return nil
+			}
 			t.endOfDay = nil
 			t.state.Status = DayStarting
 			t.state.GameLogic.NextDay(t.state)
 		}
+
 	}
+
 	skip, err := t.BaseScene.Update()
 	if err != nil {
 		return err
@@ -240,11 +263,12 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 
 	if t.state.Status == InitialState {
 		t.state.Stats = make(map[string]int)
-		t.state.Stats[npc.Money] = 20
-		t.state.Stats[npc.Happiness] = 10
-		t.state.Stats[npc.Security] = 15
+		t.state.Stats[npc.Money] = 10
+		t.state.Stats[npc.Happiness] = 0
+		t.state.Stats[npc.Security] = 10
 		t.state.Stats[npc.Food] = 10
-		t.state.Stats[npc.Health] = 30
+		t.state.Stats[npc.Health] = 10
+		t.state.Stats[npc.Cultural] = 10
 		t.state.Day = 1
 
 		now := time.Now()
@@ -257,11 +281,11 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 				GiftValue: 10,
 			},
 			{
-				Day:       9,
+				Day:       10,
 				Stat:      npc.Health,
-				Value:     50,
+				Value:     30,
 				GiftStat:  npc.Security,
-				GiftValue: 10,
+				GiftValue: 50,
 			},
 			{
 				Day:       14,

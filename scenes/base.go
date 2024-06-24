@@ -87,6 +87,13 @@ func (bs *BaseScene) Update() (bool, error) {
 }
 
 func (bs *BaseScene) Draw(screen *ebiten.Image) {
+	if bs.state.Status == HappyEnd {
+		bs.Text.ShowAndQuestion([]string{"You beat the game!"}, nil, func(s string) {})
+		bs.Text.Draw(screen)
+	} else if bs.state.Status == GameOver {
+		bs.Text.ShowAndQuestion([]string{"Sorry... you didn't make it"}, nil, func(s string) {})
+		bs.Text.Draw(screen)
+	}
 	bs.MapScene.Draw(screen)
 	if bs.rulesUI != nil {
 		op := &ebiten.DrawImageOptions{}

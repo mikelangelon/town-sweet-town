@@ -8,13 +8,14 @@ import (
 )
 
 type State struct {
-	Player    *graphics.Char
-	Status    int
-	World     map[string]*SceneMap
-	Stats     map[string]int
-	Day       int
-	Goals     []world.Goal
-	GameLogic Brainer
+	Player      *graphics.Char
+	Status      int
+	World       map[string]*SceneMap
+	Stats       map[string]int
+	Day         int
+	Goals       []world.Goal
+	GameLogic   Brainer
+	StatusEnded *int
 }
 
 type Brainer interface {
@@ -54,4 +55,6 @@ const (
 	DayEnding
 	DayStarting
 	Pause
+	HappyEnd
+	GameOver
 )
