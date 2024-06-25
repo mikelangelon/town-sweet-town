@@ -92,11 +92,11 @@ func (t *Town) Update() error {
 		if t.endOfDay.done {
 			for _, v := range t.NPCs {
 				if rand.Intn(100) < v.NitPicky {
-					values := []string{npc.Cultural, npc.Health, npc.Security, npc.Food, npc.Happiness}
+					values := []string{npc.Cultural, npc.Health, npc.Security, npc.Happiness}
 					v.Wishes = append(v.Wishes, npc.Wish{
 						DayStart:  t.state.Day + 1,
 						DayEnd:    t.state.Day + 3,
-						Stat:      values[rand.Intn(5)],
+						Stat:      values[rand.Intn(4)],
 						Value:     t.state.Day * v.NitPickyLevel,
 						Happiness: 3,
 					})
@@ -118,24 +118,37 @@ func (t *Town) Update() error {
 				t.endOfDay = nil
 				return nil
 			}
-			var leavingNPCs []string
-			for _, v := range t.endOfDay.leavingNPCs {
+			var byebyeNPCsMessages []string
+			removeNPC := func(id string, message string) {
 				for _, h := range t.state.World["town1"].Houses {
-					if h.Owner != nil && *h.Owner == v.ID {
+					if h.Owner != nil && *h.Owner == id {
 						h.Owner = nil
 					}
 				}
 				for i, j := range t.NPCs {
-					if j.ID == v.ID {
-						leavingNPCs = append(leavingNPCs, fmt.Sprintf("%s was sad and left the village", v.ID))
+					if j.ID == id {
+						byebyeNPCsMessages = append(byebyeNPCsMessages, fmt.Sprintf("%s %s", id, message))
 						t.NPCs = append(t.NPCs[0:i], t.NPCs[i+1:]...)
 						break
 					}
 				}
-				t.state.World["town1"].RemoveNPC(v.ID)
+				t.state.World["town1"].RemoveNPC(id)
 			}
-			if len(leavingNPCs) > 0 {
-				t.Text.ShowAndQuestion(leavingNPCs, nil, func(s string) {})
+			// Dying NPCs due to food
+
+			var dyingNPC string
+			if t.state.Stats[npc.Food] < 0 {
+				dyingNPC = t.NPCs[rand.Intn(len(t.NPCs))].ID
+				removeNPC(dyingNPC, "died due to the lack of food")
+				byebyeNPCsMessages = append(byebyeNPCsMessages, "Good news! Now you have additional food!")
+				t.state.Stats[npc.Food] += 5
+			}
+			// Leaving NPCs due to wishes
+			for _, v := range t.endOfDay.leavingNPCs {
+				removeNPC(v.ID, "was sad and left the village")
+			}
+			if len(byebyeNPCsMessages) > 0 {
+				t.Text.ShowAndQuestion(byebyeNPCsMessages, nil, func(s string) {})
 			}
 
 			//t.leavingNPCs = t.endOfDay.leavingNPCs
