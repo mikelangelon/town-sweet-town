@@ -51,6 +51,7 @@ const (
 	InitExplanation
 	NoClothes
 	Playing
+	CheckWishes
 	Transitioning
 	DayEnding
 	DayStarting

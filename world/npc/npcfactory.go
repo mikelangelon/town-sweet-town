@@ -4,6 +4,7 @@ import (
 	"github.com/icrowley/fake"
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
+	"math/rand"
 )
 
 type NPCFactory struct {
@@ -26,6 +27,8 @@ func (n *NPCFactory) NewNPC(id int, withIDs []int, pos common.Position, chs Char
 			X: pos.X - 7*16,
 			Y: pos.Y,
 		},
-		Chars: chs,
+		Chars:         chs,
+		NitPicky:      rand.Intn(100),
+		NitPickyLevel: rand.Intn(8),
 	}
 }

@@ -12,12 +12,15 @@ const groupPhases = 3
 
 type NPC struct {
 	graphics.Char
-	Move       *common.Position
-	moving     bool
-	Chars      Chars
-	House      *house.House
-	DayIn      int
-	alreadyMet bool
+	Move          *common.Position
+	moving        bool
+	Chars         Chars
+	House         *house.House
+	DayIn         int
+	alreadyMet    bool
+	NitPicky      int
+	NitPickyLevel int
+	Wishes        []Wish
 }
 
 func (n *NPC) SetHouse(house *house.House, dayIn int) {

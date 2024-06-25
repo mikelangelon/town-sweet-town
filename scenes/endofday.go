@@ -19,8 +19,9 @@ type endOfDay struct {
 	mapProgress   map[string]*widget.ProgressBar
 	currentStuff  *widget.Text
 
-	stats map[string]int
-	done  bool
+	stats       map[string]int
+	done        bool
+	leavingNPCs []*npc.NPC
 }
 
 func (e *endOfDay) Update() {
@@ -54,6 +55,23 @@ func createShowEndOfDay(applier npc.RuleApplier, npcs npc.NPCs, day int, stats m
 
 	var e endOfDay
 	e.endOfDaySteps = applier.ApplyRules(npcs)
+	// Check wishes
+	oldWishes := npcs.OldWishes(day)
+	for _, v := range oldWishes {
+		if v.Wish.DayEnd != day {
+			continue
+		}
+		if stats[v.Wish.Stat] > v.Wish.Value {
+			e.endOfDaySteps = append(e.endOfDaySteps, npc.StatStep{
+				Name:   npc.Happiness,
+				CharID: &v.NPC.ID,
+				Value:  3,
+				Text:   "Villager wish accomplished",
+			})
+		} else {
+			e.leavingNPCs = append(e.leavingNPCs, v.NPC)
+		}
+	}
 	t := time.Now()
 	e.endOfDayTimer = &t
 

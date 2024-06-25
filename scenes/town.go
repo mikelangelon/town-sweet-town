@@ -13,6 +13,7 @@ import (
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
 	"image/color"
+	"math/rand"
 	"time"
 )
 
@@ -89,6 +90,18 @@ func (t *Town) Update() error {
 	if t.endOfDay != nil {
 		t.endOfDay.Update()
 		if t.endOfDay.done {
+			for _, v := range t.NPCs {
+				if rand.Intn(100) < v.NitPicky {
+					values := []string{npc.Cultural, npc.Health, npc.Security, npc.Food, npc.Happiness}
+					v.Wishes = append(v.Wishes, npc.Wish{
+						DayStart:  t.state.Day + 1,
+						DayEnd:    t.state.Day + 3,
+						Stat:      values[rand.Intn(5)],
+						Value:     t.state.Day * v.NitPickyLevel,
+						Happiness: 3,
+					})
+				}
+			}
 			step, end := t.state.GameLogic.GetRuler().CheckGoals(t.state.Goals, t.state.Day, t.state.Stats)
 			switch end {
 			case 0:
@@ -105,6 +118,27 @@ func (t *Town) Update() error {
 				t.endOfDay = nil
 				return nil
 			}
+			var leavingNPCs []string
+			for _, v := range t.endOfDay.leavingNPCs {
+				for _, h := range t.state.World["town1"].Houses {
+					if h.Owner != nil && *h.Owner == v.ID {
+						h.Owner = nil
+					}
+				}
+				for i, j := range t.NPCs {
+					if j.ID == v.ID {
+						leavingNPCs = append(leavingNPCs, fmt.Sprintf("%s was sad and left the village", v.ID))
+						t.NPCs = append(t.NPCs[0:i], t.NPCs[i+1:]...)
+						break
+					}
+				}
+				t.state.World["town1"].RemoveNPC(v.ID)
+			}
+			if len(leavingNPCs) > 0 {
+				t.Text.ShowAndQuestion(leavingNPCs, nil, func(s string) {})
+			}
+
+			//t.leavingNPCs = t.endOfDay.leavingNPCs
 			t.endOfDay = nil
 			t.state.Status = DayStarting
 			t.state.GameLogic.NextDay(t.state)
@@ -153,13 +187,20 @@ func (t *Town) Draw(screen *ebiten.Image) {
 			t.TransitionSleep--
 		} else {
 			t.state.Day++
-			t.state.Status = Playing
+			t.state.Status = CheckWishes
 		}
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(0, 0)
 		bg := ebiten.NewImage(common.ScreenWidth, common.ScreenHeight)
 		bg.Fill(colorGoal)
 		screen.DrawImage(bg, op)
+	}
+	if t.state.Status == CheckWishes {
+		wishes := t.NPCs.NewWishesString(t.state.Day, t.state.Stats)
+		if len(wishes) > 0 {
+			t.Text.ShowAndQuestion(wishes.String(), nil, func(s string) {})
+		}
+		t.state.Status = Playing
 	}
 	if t.endOfDay != nil {
 		op := &ebiten.DrawImageOptions{}
