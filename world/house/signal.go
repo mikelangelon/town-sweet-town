@@ -7,8 +7,9 @@ import (
 
 type Signal struct {
 	*graphics.Char
-	HousePlace common.Position
-	House      *House
+	HousePlace   common.Position
+	House        *House
+	HouseOptions []string
 }
 
 func NewSignal(char *graphics.Char, id string, housePlace common.Position) Signal {

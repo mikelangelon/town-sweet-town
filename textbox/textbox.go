@@ -62,7 +62,6 @@ func (c *TextBox) Update() error {
 			if c.SelectedOption+1 < len(c.Options) {
 				c.SelectedOption++
 			}
-
 		}
 	}
 	return nil

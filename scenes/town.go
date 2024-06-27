@@ -237,7 +237,12 @@ func (t *Town) FireAction() {
 }
 
 func (t *Town) SignalAction(signal house.Signal) {
-	options := house.MapHouseBulding.GiveMeThree()
+	options := signal.HouseOptions
+	if len(options) == 0 {
+		options = house.MapHouseBulding.GiveMeThree()
+		signal.HouseOptions = options
+	}
+
 	t.Text.ShowAndQuestion(
 		[]string{"Which house do you want to build?"},
 		append(options,
