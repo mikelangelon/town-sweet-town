@@ -27,10 +27,11 @@ type BaseScene struct {
 	sm    *stagehand.SceneManager[State]
 
 	// World related
-	ID       string
-	MapScene *graphics.MapScene
-	NPCs     npc.NPCs
-	Objects  []world.Object
+	ID         string
+	MapScene   *graphics.MapScene
+	NPCs       npc.NPCs
+	Objects    []world.Object
+	MovingTime *time.Time
 
 	// Between scenes
 	TransitionPoints Transition
@@ -187,23 +188,37 @@ func (bs *BaseScene) playerUpdate() (bool, error) {
 	var pressed = false
 
 	x, y := bs.state.Player.X, bs.state.Player.Y
-	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
-		pressed = true
-		y -= speed
+
+	if bs.MovingTime == nil || time.Since(*bs.MovingTime) > 300*time.Millisecond {
+		var movingTime *time.Time
+		if ebiten.IsKeyPressed(ebiten.KeyUp) {
+			pressed = true
+			y -= speed
+			t := time.Now()
+			movingTime = &t
+		}
+		if ebiten.IsKeyPressed(ebiten.KeyDown) {
+			pressed = true
+			y += speed
+			t := time.Now()
+			movingTime = &t
+		}
+		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+			pressed = true
+			x -= speed
+			t := time.Now()
+			movingTime = &t
+		}
+		if ebiten.IsKeyPressed(ebiten.KeyRight) {
+			pressed = true
+			x += speed
+			t := time.Now()
+			movingTime = &t
+		}
+		bs.MovingTime = movingTime
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
-		pressed = true
-		y += speed
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
-		pressed = true
-		x -= speed
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
-		pressed = true
-		x += speed
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+
+	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
 		pressed = true
 	}
 	if x > (common.ScreenWidth-16)/common.Scale || x < 0 ||
