@@ -3,7 +3,6 @@ package scenes
 import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/joelschutz/stagehand"
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
@@ -33,22 +32,7 @@ func NewTown(id string, mapScene *graphics.MapScene) *Town {
 }
 
 func (t *Town) Update() error {
-	if t.rulesUI != nil {
-		t.rulesUI.ui.Update()
-
-		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			t.rulesUI = nil
-			t.goalsUI = NewGoals(t.state.Goals)
-		}
-
-		return nil
-	}
-	if t.goalsUI != nil {
-		t.goalsUI.ui.Update()
-		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			t.state.Status = Playing
-			t.goalsUI = nil
-		}
+	if t.uiUpdate() {
 		return nil
 	}
 	if t.state.Status == HappyEnd || t.state.Status == GameOver {

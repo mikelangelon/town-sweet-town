@@ -20,6 +20,9 @@ func NewEntrance(id string, mapScene *graphics.MapScene) *Entrance {
 }
 
 func (e *Entrance) Update() error {
+	if e.uiUpdate() {
+		return nil
+	}
 	skip, err := e.BaseScene.Update()
 	if err != nil {
 		return err

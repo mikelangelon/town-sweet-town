@@ -226,6 +226,28 @@ func (bs *BaseScene) playerUpdate() (bool, error) {
 	return true, nil
 }
 
+func (bs *BaseScene) uiUpdate() bool {
+	if bs.rulesUI != nil {
+		bs.rulesUI.ui.Update()
+
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			bs.rulesUI = nil
+			bs.goalsUI = NewGoals(bs.state.Goals)
+		}
+
+		return true
+	}
+	if bs.goalsUI != nil {
+		bs.goalsUI.ui.Update()
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			bs.state.Status = Playing
+			bs.goalsUI = nil
+		}
+		return true
+	}
+	return false
+}
+
 func progress(current int) *widget.ProgressBar {
 	return widget.NewProgressBar(
 		widget.ProgressBarOpts.WidgetOpts(
