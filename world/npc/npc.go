@@ -79,3 +79,27 @@ func (n *NPC) Talk(day int) []string {
 	}
 	return result
 }
+
+func (n *NPC) AdaptNitpicky() int {
+	if n.House == nil {
+		return n.NitPickyLevel
+	}
+	var substract int
+	switch n.House.Type {
+	case 0:
+		substract = 5
+	case 1:
+		substract = 10
+	case 2:
+		substract = 20
+	case 3:
+		substract = 10
+	case 4:
+		substract = 30
+	}
+	adapted := n.NitPicky - substract
+	if adapted < 0 {
+		return 0
+	}
+	return adapted
+}

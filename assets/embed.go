@@ -5,6 +5,9 @@ import (
 )
 
 var (
+	//go:embed Title.png
+	Title []byte
+
 	//go:embed tilemap_packed.png
 	TileMapPacked []byte
 

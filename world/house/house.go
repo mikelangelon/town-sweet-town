@@ -16,6 +16,7 @@ const (
 
 type House struct {
 	ID    string
+	Type  int
 	Owner *string
 	House graphics.MapScene
 }

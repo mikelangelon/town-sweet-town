@@ -44,7 +44,6 @@ func (t *Town) Update() error {
 		if err != nil {
 			return err
 		}
-		t.state.Status = Playing
 	}
 	if t.state.Status == InitialState && t.Ack != nil && time.Since(*t.Ack) > 5*time.Second {
 		t.state.Status = InitExplanation
@@ -75,7 +74,9 @@ func (t *Town) Update() error {
 		t.endOfDay.Update()
 		if t.endOfDay.done {
 			for _, v := range t.NPCs {
-				if rand.Intn(100) < v.NitPicky {
+				random := rand.Intn(100)
+				fmt.Printf("NPC %s --> random of %d, with  nitpicky of %d, adapted as %d", v.ID, random, v.NitPicky, v.AdaptNitpicky())
+				if random < v.AdaptNitpicky() {
 					values := []string{npc.Cultural, npc.Health, npc.Security, npc.Happiness}
 					v.Wishes = append(v.Wishes, npc.Wish{
 						DayStart:  t.state.Day + 1,
@@ -84,6 +85,7 @@ func (t *Town) Update() error {
 						Value:     t.state.Day * v.NitPickyLevel,
 						Happiness: 3,
 					})
+					fmt.Printf("Adding wish")
 				}
 			}
 			step, end := t.state.GameLogic.GetRuler().CheckGoals(t.state.Goals, t.state.Day, t.state.Stats)
@@ -259,6 +261,7 @@ func (t *Town) SignalAction(signal house.Signal) {
 			t.state.Stats["money"] -= info.Cost
 			newHouse := t.state.GameLogic.CreateHouse(fmt.Sprintf("%s %s", info.Name, signal.ID), info.Type)
 			newHouse.House.Offset = signal.HousePlace
+			newHouse.Type = info.Type
 			t.MapScene.Child = append(t.MapScene.Child, &newHouse.House)
 			t.state.World["town1"].Houses = append(t.state.World["town1"].Houses, &newHouse)
 		},
@@ -309,7 +312,7 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 		t.state.Stats[npc.Money] = 10
 		t.state.Stats[npc.Happiness] = 0
 		t.state.Stats[npc.Security] = 10
-		t.state.Stats[npc.Food] = 10
+		t.state.Stats[npc.Food] = 15
 		t.state.Stats[npc.Health] = 10
 		t.state.Stats[npc.Cultural] = 10
 		t.state.Day = 1
@@ -343,6 +346,9 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 }
 
 func (t *Town) PostTransition(st State, original stagehand.Scene[State]) {
+	if t.state.Status == InitialState {
+		return
+	}
 	t.state.Player.X, t.state.Player.Y = t.TransitionPoints.Position.X, t.TransitionPoints.Position.Y
 	t.state.Status = Playing
 }

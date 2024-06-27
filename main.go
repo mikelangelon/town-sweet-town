@@ -17,6 +17,7 @@ import (
 )
 
 func main() {
+
 	town1, err := graphics.NewMapScene(assets.TileMapPacked, assets.Town1, assets.TileMapPackedTSX, common.ScreenWidth, common.ScreenHeight, common.Scale)
 	if err != nil {
 		slog.Error("crash parseTileSet", "error", err)
@@ -67,6 +68,9 @@ func main() {
 		}},
 	}
 	state := gameLogic.NextDay(scenes.State{})
+	state = scenes.State{
+		Status: scenes.Menu,
+	}
 	people1Scene := scenes.NewEntrance("people", people1)
 	town1Scene := scenes.NewTown("town1", town1)
 	town1Scene.TransitionPoints = scenes.Transition{
@@ -79,7 +83,7 @@ func main() {
 		Scene:     town1Scene,
 		Direction: stagehand.LeftToRight,
 	}
-	sm := stagehand.NewSceneManager[scenes.State](town1Scene, state)
+	sm := stagehand.NewSceneManager[scenes.State](scenes.NewMenu(town1Scene, gameLogic), state)
 	ebiten.SetWindowSize(common.ScreenWidth, common.ScreenHeight)
 	if err := ebiten.RunGame(sm); err != nil {
 		slog.Error("something went wrong", "err", err)

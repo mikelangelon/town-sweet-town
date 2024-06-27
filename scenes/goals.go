@@ -26,7 +26,7 @@ func NewGoals(goals []world.Goal) *goalsUI {
 	rootContainer.AddChild(label)
 	for i, v := range goals {
 		title := widget.NewText(
-			widget.TextOpts.Text(fmt.Sprintf("Goal %d", i), common.NormalFont, color.White),
+			widget.TextOpts.Text(fmt.Sprintf("Goal %d", i+1), common.NormalFont, color.White),
 			widget.TextOpts.Insets(widget.NewInsetsSimple(20)),
 		)
 		goal := widget.NewText(
