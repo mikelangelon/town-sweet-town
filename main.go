@@ -91,7 +91,12 @@ func main() {
 		Scene:     town1Scene,
 		Direction: stagehand.LeftToRight,
 	}
-	sm := stagehand.NewSceneManager[scenes.State](scenes.NewMenu(town1Scene, gameLogic), state)
+	menuScene := scenes.NewMenu(town1Scene, gameLogic)
+	town1Scene.MenuScene = scenes.Transition{
+		Scene:     menuScene,
+		Direction: stagehand.TopToBottom,
+	}
+	sm := stagehand.NewSceneManager[scenes.State](menuScene, state)
 	ebiten.SetWindowSize(common.ScreenWidth, common.ScreenHeight)
 	if err := ebiten.RunGame(sm); err != nil {
 		slog.Error("something went wrong", "err", err)

@@ -21,6 +21,7 @@ type Town struct {
 
 	endOfDay        *endOfDay
 	TransitionSleep uint8
+	MenuScene       Transition
 	// For now, only for initial presentation
 	Ack *time.Time
 }
@@ -35,9 +36,18 @@ func (t *Town) Update() error {
 	if t.uiUpdate() {
 		return nil
 	}
-	if t.state.Status == HappyEnd || t.state.Status == GameOver {
+	if !t.Text.Visible() && t.state.Status == GoingToMenu {
+		t.sm.SwitchWithTransition(t.MenuScene.Scene, stagehand.NewTicksTimedSlideTransition[State](t.MenuScene.Direction, time.Millisecond*time.Duration(200)))
+		t.state.Day = 0
 		t.state.Status = Menu
-		return nil
+	}
+	if !t.Text.Visible() && t.state.Status == HappyEnd {
+		t.Text.ShowAndQuestion([]string{"Today is the last day of the 2 weeks period", "You beat the game! Congratulations!"}, nil, func(s string) {})
+		t.state.Status = GoingToMenu
+	}
+	if !t.Text.Visible() && t.state.Status == GameOver {
+		t.Text.ShowAndQuestion([]string{"Today is the last day of the 2 weeks period", "Sorry... you didn't make it"}, nil, func(s string) {})
+		t.state.Status = GoingToMenu
 	}
 	if t.state.Status == InitialState {
 		_, err := t.playerUpdate()
@@ -316,9 +326,6 @@ func (t *Town) PreTransition(destination stagehand.Scene[State]) State {
 
 func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 	t.BaseScene.Load(st, sm)
-	//if !t.state.TownSillySong.IsPlaying() {
-	//	t.state.TownSillySong.Play()
-	//}
 
 	for _, v := range t.state.World["town1"].Houses {
 		t.MapScene.Child = append(t.MapScene.Child, &v.House)

@@ -23,6 +23,7 @@ type MenuScene struct {
 	StartScene Transition
 
 	gameLogic Brainer
+	TimeInit  time.Time
 }
 
 func NewMenu(scene stagehand.Scene[State], logic Brainer) *MenuScene {
@@ -46,6 +47,7 @@ func NewMenu(scene stagehand.Scene[State], logic Brainer) *MenuScene {
 			Direction: stagehand.BottomToTop,
 		},
 		gameLogic: logic,
+		TimeInit:  time.Now(),
 	}
 	rootContainer := widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
@@ -104,6 +106,7 @@ func NewMenu(scene stagehand.Scene[State], logic Brainer) *MenuScene {
 		Container: rootContainer,
 	}
 	menu.ui = &ui
+	menu.btn = button
 	return menu
 
 }
@@ -114,6 +117,10 @@ func (bs *MenuScene) Layout(w, h int) (int, int) {
 
 func (m *MenuScene) Update() error {
 	m.ui.Update()
+	if time.Since(m.TimeInit) > 500*time.Millisecond && ebiten.IsKeyPressed(ebiten.KeyEnter) {
+		m.btn.Click()
+	}
+
 	return nil
 }
 
@@ -125,6 +132,7 @@ func (m *MenuScene) Draw(screen *ebiten.Image) {
 }
 
 func (m *MenuScene) Load(st State, sm stagehand.SceneController[State]) {
+	m.TimeInit = time.Now()
 	m.state = st
 	m.sm = sm.(*stagehand.SceneManager[State])
 	if !m.state.MenuSong.IsPlaying() {
@@ -133,6 +141,7 @@ func (m *MenuScene) Load(st State, sm stagehand.SceneController[State]) {
 	if m.state.TownSillySong.IsPlaying() {
 		m.state.TownSillySong.Pause()
 	}
+
 }
 
 func (m *MenuScene) Unload() State {

@@ -90,15 +90,15 @@ func (n *NPC) AdaptNitpicky() int {
 	var substract int
 	switch n.House.Type {
 	case 0:
-		substract = 5
+		substract = 0
 	case 1:
-		substract = 10
+		substract = 4
 	case 2:
-		substract = 20
-	case 3:
 		substract = 10
+	case 3:
+		substract = -5
 	case 4:
-		substract = 30
+		substract = 20
 	}
 	adapted := n.NitPicky - substract
 	if adapted < 0 {

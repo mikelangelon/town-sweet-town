@@ -113,7 +113,7 @@ func WithRandom(amount int) Chars {
 		})
 		options = append(options[0:index], options[index+1:]...)
 	}
-	return result.WithRent(int64(rand.Intn(3 + 3)))
+	return result.WithRent(int64(rand.Intn(3) + 2))
 }
 
 const (

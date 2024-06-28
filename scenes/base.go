@@ -88,13 +88,6 @@ func (bs *BaseScene) Update() (bool, error) {
 }
 
 func (bs *BaseScene) Draw(screen *ebiten.Image) {
-	if bs.state.Status == HappyEnd {
-		bs.Text.ShowAndQuestion([]string{"You beat the game!"}, nil, func(s string) {})
-		bs.Text.Draw(screen)
-	} else if bs.state.Status == GameOver {
-		bs.Text.ShowAndQuestion([]string{"Sorry... you didn't make it"}, nil, func(s string) {})
-		bs.Text.Draw(screen)
-	}
 	bs.MapScene.Draw(screen)
 	if bs.rulesUI != nil {
 		op := &ebiten.DrawImageOptions{}
@@ -189,7 +182,7 @@ func (bs *BaseScene) playerUpdate() (bool, error) {
 
 	x, y := bs.state.Player.X, bs.state.Player.Y
 
-	if bs.MovingTime == nil || time.Since(*bs.MovingTime) > 300*time.Millisecond {
+	if bs.MovingTime == nil || time.Since(*bs.MovingTime) > 200*time.Millisecond {
 		var movingTime *time.Time
 		if ebiten.IsKeyPressed(ebiten.KeyUp) {
 			pressed = true

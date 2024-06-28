@@ -61,4 +61,5 @@ const (
 	Pause
 	HappyEnd
 	GameOver
+	GoingToMenu
 )

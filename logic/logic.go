@@ -17,6 +17,8 @@ type GameLogic struct {
 	CharFactory      *graphics.CharFactory
 	FancyTownFactory *graphics.CharFactory
 	RulesApplier     *npc.RuleApplier
+
+	positionAvailable []common.Position
 }
 
 func (g GameLogic) GetRuler() npc.RuleApplier {
@@ -35,19 +37,23 @@ func (g GameLogic) ChangePlayer(state scenes.State) scenes.State {
 func (g GameLogic) NextDay(state scenes.State) scenes.State {
 	entrance := state.World["people"]
 	day := state.Day + 1
+
 	const offsetX = 13
 	const offsetY = 4
-	var positionAvailable []common.Position
-	for x := 1; x < 10; x++ {
-		for y := 1; y < 14; y++ {
-			positionAvailable = append(positionAvailable, common.Position{X: int64(x+offsetX) * 16, Y: int64(y+offsetY) * 16})
+	if len(g.positionAvailable) == 0 {
+		var positionAvailable []common.Position
+		for x := 1; x < 10; x++ {
+			for y := 1; y < 14; y++ {
+				positionAvailable = append(positionAvailable, common.Position{X: int64(x+offsetX) * 16, Y: int64(y+offsetY) * 16})
+			}
 		}
+		g.positionAvailable = positionAvailable
 	}
 
 	getPositionAvailable := func() common.Position {
-		index := rand.Intn(len(positionAvailable))
-		pos := positionAvailable[index]
-		positionAvailable = append(positionAvailable[:index], positionAvailable[index+1:]...)
+		index := rand.Intn(len(g.positionAvailable))
+		pos := g.positionAvailable[index]
+		g.positionAvailable = append(g.positionAvailable[:index], g.positionAvailable[index+1:]...)
 		return pos
 	}
 
@@ -87,7 +93,7 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 				"people": {
 					NPCs: []*npc.NPC{
 						g.NPCFactory.NewNPC(54, []int{11, 22}, getPositionAvailable(), npc.WithRandom(3)),
-						g.NPCFactory.NewNPC(54, []int{11, 22}, getPositionAvailable(), npc.WithRandom(3)),
+						g.NPCFactory.NewNPC(162, []int{11, 22}, getPositionAvailable(), npc.WithRandom(3)),
 						g.NPCFactory.NewNPC(271, nil, getPositionAvailable(), npc.WithRandom(3)),
 						g.NPCFactory.NewNPC(162, []int{389, 476, 312}, getPositionAvailable(), npc.WithRandom(4)),
 					},
