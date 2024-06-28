@@ -74,6 +74,9 @@ func (n *NPC) Talk(day int) []string {
 	if n.House == nil {
 		result = append(result, "Could I live in one house, please?")
 	}
+	if len(n.Wishes) > 0 {
+		result = append(result, n.Wishes[0].IamText())
+	}
 	if n.House != nil && n.DayIn != day {
 		result = append(result, "How can I help you?")
 	}

@@ -75,7 +75,7 @@ func (t *Town) Update() error {
 		if t.endOfDay.done {
 			for _, v := range t.NPCs {
 				random := rand.Intn(100)
-				fmt.Printf("NPC %s --> random of %d, with  nitpicky of %d, adapted as %d", v.ID, random, v.NitPicky, v.AdaptNitpicky())
+				fmt.Printf("NPC %s --> random of %d, with  nitpicky of %d, adapted as %d\n", v.ID, random, v.NitPicky, v.AdaptNitpicky())
 				if random < v.AdaptNitpicky() {
 					values := []string{npc.Cultural, npc.Health, npc.Security, npc.Happiness}
 					v.Wishes = append(v.Wishes, npc.Wish{
@@ -85,7 +85,7 @@ func (t *Town) Update() error {
 						Value:     t.state.Day * v.NitPickyLevel,
 						Happiness: 3,
 					})
-					fmt.Printf("Adding wish")
+					fmt.Printf("Adding wish stat %s value %d\n", v.Wishes[len(v.Wishes)-1].Stat, v.Wishes[len(v.Wishes)-1].Value)
 				}
 			}
 			step, end := t.state.GameLogic.GetRuler().CheckGoals(t.state.Goals, t.state.Day, t.state.Stats)

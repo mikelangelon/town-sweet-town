@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	Love = "loves"
-	Hate = "hates"
-	Meh  = "doesn't care about"
+	Love = "love"
+	Hate = "hate"
+	Meh  = "don't care about"
 )
 
 type Characteristic struct {
