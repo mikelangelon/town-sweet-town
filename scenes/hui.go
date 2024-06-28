@@ -44,7 +44,7 @@ func NewHUI() *hui {
 		widget.TextOpts.Text("Security: 000", face, color.White),
 	)
 	lCultural := widget.NewText(
-		widget.TextOpts.Text("Cultural: 000", face, color.White),
+		widget.TextOpts.Text("Culture: 000", face, color.White),
 	)
 	rootContainer.AddChild(lDay)
 	rootContainer.AddChild(lMoney)

@@ -62,7 +62,9 @@ func (n *NPC) Sentences() []string {
 			group = ""
 			continue
 		}
-
+	}
+	if len(n.Wishes) > 0 {
+		result = append(result, n.Wishes[0].IamText())
 	}
 	if len(group) > 0 {
 		result = append(result, group)
@@ -73,9 +75,6 @@ func (n *NPC) Talk(day int) []string {
 	result := n.Sentences()
 	if n.House == nil {
 		result = append(result, "Could I live in one house, please?")
-	}
-	if len(n.Wishes) > 0 {
-		result = append(result, n.Wishes[0].IamText())
 	}
 	if n.House != nil && n.DayIn != day {
 		result = append(result, "How can I help you?")

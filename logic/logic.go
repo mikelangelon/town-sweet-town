@@ -59,7 +59,6 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 
 	switch day {
 	case 1:
-
 		char := g.CharFactory.NewChar(1, nil, 16*6, 16*6)
 		fire := world.Fire{Char: g.FancyTownFactory.NewChar(470, nil, 16*6, 16*10)}
 		sWest := house.NewSignal(
@@ -78,9 +77,41 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 			g.TinyTownFactory.NewChar(83, nil, 16*8, 16*17),
 			"South",
 			common.Position{X: 16 * 7, Y: 16 * 12})
+
+		stats := make(map[string]int)
+		stats[npc.Money] = 10 * ratio(state.Difficulty)
+		stats[npc.Happiness] = 0
+		stats[npc.Food] = 15 * ratio(state.Difficulty) / 2
+		stats[npc.Security] = 10
+		stats[npc.Health] = 10
+		stats[npc.Cultural] = 10
+		options := []string{npc.Cultural, npc.Health, npc.Security}
+		goals := []world.Goal{
+			{
+				Day:       5,
+				Stat:      options[rand.Intn(3)],
+				Value:     30 - 10*(ratio(state.Difficulty)-1)/2,
+				GiftStat:  npc.Food,
+				GiftValue: 15,
+			},
+			{
+				Day:       10,
+				Stat:      options[rand.Intn(3)],
+				Value:     40 - 10*(ratio(state.Difficulty)-1)/2,
+				GiftStat:  npc.Food,
+				GiftValue: 30,
+			},
+			{
+				Day:       14,
+				Stat:      npc.Happiness,
+				Value:     100,
+				Mandatory: true,
+			},
+		}
 		return scenes.State{
 			GameLogic: g,
 			Player:    char,
+			Goals:     goals,
 			Status:    scenes.InitialState,
 			World: map[string]*scenes.SceneMap{
 				"town1": {
@@ -99,6 +130,8 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 					},
 				},
 			},
+			Stats:         stats,
+			Day:           day,
 			MenuSong:      state.MenuSong,
 			TownSillySong: state.TownSillySong,
 		}
@@ -127,4 +160,16 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 	g.RulesApplier.Rules = append(g.RulesApplier.Rules, npc.RandomRule())
 	state.Day = day
 	return state
+}
+
+func ratio(difficulty string) int {
+	switch difficulty {
+	case "Hard":
+		return 1
+	case "Normal":
+		return 2
+	case "Easy":
+		return 3
+	}
+	return 0
 }

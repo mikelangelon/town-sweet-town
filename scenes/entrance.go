@@ -7,6 +7,7 @@ import (
 	"github.com/mikelangelon/town-sweet-town/textbox"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
+	"log/slog"
 )
 
 type Entrance struct {
@@ -54,7 +55,9 @@ func (e *Entrance) TalkToNPC(npc *npc.NPC) {
 			}
 			npc.Move = &common.Position{X: -16, Y: npc.Y}
 			e.state.World["people"].RemoveNPC(npc.ID)
+			slog.With("id", npc.ID).Info("removing npc in entrance")
 			e.state.World["town1"].AddNPC(npc)
+			slog.With("id", npc.ID).Info("adding npc in town")
 		}
 	}
 	var options []string

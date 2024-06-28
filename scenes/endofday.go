@@ -140,7 +140,7 @@ func createShowEndOfDay(applier npc.RuleApplier, npcs npc.NPCs, day int, stats m
 		widget.TextOpts.Text("Security", face, color.White),
 	)
 	lCultural := widget.NewText(
-		widget.TextOpts.Text("Cultural", face, color.White),
+		widget.TextOpts.Text("Culture", face, color.White),
 	)
 	e.currentStuff = widget.NewText(
 		widget.TextOpts.Text("...", face, color.White),

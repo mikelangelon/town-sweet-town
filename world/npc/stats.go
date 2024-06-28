@@ -8,7 +8,7 @@ import (
 
 const (
 	Happiness = "happiness"
-	Cultural  = "cultural"
+	Cultural  = "culture"
 	Health    = "health"
 	Security  = "security"
 	Food      = "food"

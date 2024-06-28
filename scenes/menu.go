@@ -9,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/joelschutz/stagehand"
 	"github.com/mikelangelon/town-sweet-town/assets"
+	"golang.org/x/image/font"
 	"image/color"
 	"time"
 )
@@ -19,7 +20,8 @@ type MenuScene struct {
 	img   *ebiten.Image
 
 	ui         *ebitenui.UI
-	btn        *widget.Button
+	Buttons    []*widget.Button
+	FocusIndex int
 	StartScene Transition
 
 	gameLogic Brainer
@@ -34,10 +36,8 @@ func NewMenu(scene stagehand.Scene[State], logic Brainer) *MenuScene {
 
 	ebitenImage := ebiten.NewImageFromImage(img)
 
-	// load images for button states: idle, hover, and pressed
 	buttonImage, _ := loadButtonImage()
 
-	// load button text font
 	face, _ := loadFont(30)
 
 	menu := &MenuScene{
@@ -51,62 +51,26 @@ func NewMenu(scene stagehand.Scene[State], logic Brainer) *MenuScene {
 	}
 	rootContainer := widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
-			//Set how much padding before displaying content
 			widget.AnchorLayoutOpts.Padding(widget.Insets{
 				Top:    350,
-				Left:   0,
-				Right:  0,
+				Left:   100,
+				Right:  100,
 				Bottom: 0,
 			}),
 		)),
 	)
-	// construct a button
-	button := widget.NewButton(
-		// set general widget options
-		widget.ButtonOpts.WidgetOpts(
-			// instruct the container's anchor layout to center the button both horizontally and vertically
-			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-				HorizontalPosition: widget.AnchorLayoutPositionCenter,
-				VerticalPosition:   widget.AnchorLayoutPositionCenter,
-			}),
-		),
-
-		// specify the images to use
-		widget.ButtonOpts.Image(buttonImage),
-
-		// specify the button's text, the font face, and the color
-		//widget.ButtonOpts.Text("Hello, World!", face, &widget.ButtonTextColor{
-		widget.ButtonOpts.Text("Start", face, &widget.ButtonTextColor{
-			Idle:  color.NRGBA{0xdf, 0xf4, 0xff, 0xff},
-			Hover: color.NRGBA{0, 255, 128, 255},
-		}),
-		widget.ButtonOpts.TextProcessBBCode(true),
-		// specify that the button's text needs some padding for correct display
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   30,
-			Right:  30,
-			Top:    5,
-			Bottom: 5,
-		}),
-
-		// add a handler that reacts to clicking the button
-		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
-			menu.StartGame()
-		}),
-
-		// Indicate that this button should not be submitted when enter or space are pressed
-		// widget.ButtonOpts.DisableDefaultKeys(),
-
-	)
-
-	rootContainer.AddChild(button)
-
-	// construct the UI
+	easyButton := menu.createButton(buttonImage, face, widget.AnchorLayoutPositionStart, "Easy")
+	normalButton := menu.createButton(buttonImage, face, widget.AnchorLayoutPositionCenter, "Normal")
+	hardButton := menu.createButton(buttonImage, face, widget.AnchorLayoutPositionEnd, "Hard")
+	rootContainer.AddChild(easyButton)
+	rootContainer.AddChild(normalButton)
+	rootContainer.AddChild(hardButton)
+	menu.Buttons = []*widget.Button{easyButton, normalButton, hardButton}
+	easyButton.Focus(true)
 	ui := ebitenui.UI{
 		Container: rootContainer,
 	}
 	menu.ui = &ui
-	menu.btn = button
 	return menu
 
 }
@@ -117,8 +81,28 @@ func (bs *MenuScene) Layout(w, h int) (int, int) {
 
 func (m *MenuScene) Update() error {
 	m.ui.Update()
-	if time.Since(m.TimeInit) > 500*time.Millisecond && ebiten.IsKeyPressed(ebiten.KeyEnter) {
-		m.btn.Click()
+	if time.Since(m.TimeInit) < 500*time.Millisecond {
+		return nil
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
+		m.Buttons[m.FocusIndex].Click()
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		m.FocusIndex--
+		if m.FocusIndex < 0 {
+			m.FocusIndex = 2
+		}
+		m.Buttons[m.FocusIndex].Focus(true)
+		m.TimeInit = time.Now().Add(450 * time.Millisecond)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		m.FocusIndex++
+		if m.FocusIndex > 2 {
+			m.FocusIndex = 0
+		}
+		m.Buttons[m.FocusIndex].Focus(true)
+		m.TimeInit = time.Now().Add(450 * time.Millisecond)
 	}
 
 	return nil
@@ -152,15 +136,14 @@ func (m *MenuScene) Unload() State {
 	return m.state
 }
 
-func (m *MenuScene) StartGame() {
+func (m *MenuScene) StartGame(difficulty string) {
+	m.state.Difficulty = difficulty
 	m.state = m.gameLogic.NextDay(m.state)
 	m.sm.SwitchWithTransition(m.StartScene.Scene, stagehand.NewTicksTimedSlideTransition[State](m.StartScene.Direction, time.Second*time.Duration(1)))
 }
 func loadButtonImage() (*widget.ButtonImage, error) {
 	idle := image.NewNineSliceColor(color.NRGBA{R: 170, G: 170, B: 180, A: 255})
-
 	hover := image.NewNineSliceColor(color.NRGBA{R: 130, G: 130, B: 150, A: 255})
-
 	pressed := image.NewNineSliceColor(color.NRGBA{R: 100, G: 100, B: 120, A: 255})
 
 	return &widget.ButtonImage{
@@ -168,4 +151,32 @@ func loadButtonImage() (*widget.ButtonImage, error) {
 		Hover:   hover,
 		Pressed: pressed,
 	}, nil
+}
+
+func (m *MenuScene) createButton(buttonImage *widget.ButtonImage, face font.Face, position widget.AnchorLayoutPosition, difficulty string) *widget.Button {
+	return widget.NewButton(
+		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				HorizontalPosition: position,
+				VerticalPosition:   widget.AnchorLayoutPositionCenter,
+			}),
+		),
+
+		widget.ButtonOpts.Image(buttonImage),
+		widget.ButtonOpts.Text(difficulty, face, &widget.ButtonTextColor{
+			Idle:  color.NRGBA{0xdf, 0xf4, 0xff, 0xff},
+			Hover: color.NRGBA{0, 255, 128, 255},
+		}),
+		widget.ButtonOpts.TextProcessBBCode(true),
+		widget.ButtonOpts.TextPadding(widget.Insets{
+			Left:   30,
+			Right:  30,
+			Top:    5,
+			Bottom: 5,
+		}),
+
+		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
+			m.StartGame(difficulty)
+		}),
+	)
 }

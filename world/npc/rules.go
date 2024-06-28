@@ -42,7 +42,7 @@ func (r RuleApplier) CheckGoals(goals []world.Goal, currentDay int, stats map[st
 		return []StatStep{
 			{
 				Name:  v.GiftStat,
-				Value: v.Value,
+				Value: 0,
 				Text:  fmt.Sprintf("You failed Goal %d! (Get to %s %d)", i+1, v.Stat, v.Value),
 			},
 		}, endStatus
@@ -123,6 +123,20 @@ var (
 			for _, v := range n {
 				if v.House.Type == 4 {
 					steps = addSteps(steps, 4, &v.ID, Happiness, "Living in a fancy house")
+				}
+			}
+			return steps
+		},
+	}
+
+	SpaceLover = Rule{
+		Name:        "Space house",
+		Description: "+5 happiness for every Stuff lover living in a Big House",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok := m[Stuff]; ok && v1.Love() == Love {
+					steps = addSteps(steps, 4, &v.ID, Happiness, "Stufflovers dream")
 				}
 			}
 			return steps
@@ -260,7 +274,7 @@ var (
 
 	ExtrovertPower = Rule{
 		Name:        "Extrovert Power",
-		Description: "+3 happiness for extrovert person",
+		Description: "+3 Happiness for extrovert person",
 		Func: func(n NPCs, steps []StatStep) []StatStep {
 			for _, v := range n {
 				m := v.Chars.charMap()
@@ -274,7 +288,7 @@ var (
 
 	IntrovertCulture = Rule{
 		Name:        "Introvert Culture",
-		Description: "+4 Culture for every introvert that likes culture",
+		Description: "+4 Culture for every introvert that likes Reading or Music",
 		Func: func(n NPCs, steps []StatStep) []StatStep {
 			for _, v := range n {
 				m := v.Chars.charMap()
@@ -390,20 +404,7 @@ var (
 		Name:        "Animal conflict",
 		Description: "-20 Happiness if villagers like & hate animals",
 		Func: func(n NPCs, steps []StatStep) []StatStep {
-			var animals bool
-			var animalHaters bool
-			for _, v := range n {
-				m := v.Chars.charMap()
-				if v1, ok1 := m[Animals]; ok1 {
-					switch v1.Love() {
-					case Love:
-						animals = true
-					case Hate:
-						animalHaters = true
-					}
-				}
-			}
-			if animals && animalHaters {
+			if isConflict(n, Animals) {
 				steps = addSteps(steps, -20, nil, Happiness, "Animal conflict")
 			}
 			return steps
@@ -414,20 +415,7 @@ var (
 		Name:        "Braveness Conflict",
 		Description: "-10 Happiness when there are adventorous and coward villagers",
 		Func: func(n NPCs, steps []StatStep) []StatStep {
-			var animals bool
-			var animalHaters bool
-			for _, v := range n {
-				m := v.Chars.charMap()
-				if v1, ok1 := m[Animals]; ok1 {
-					switch v1.Love() {
-					case Love:
-						animals = true
-					case Hate:
-						animalHaters = true
-					}
-				}
-			}
-			if animals && animalHaters {
+			if isConflict(n, Adventurous) {
 				steps = addSteps(steps, -10, nil, Happiness, "Braveness Conflict")
 			}
 			return steps
@@ -466,7 +454,168 @@ var (
 			return steps
 		},
 	}
+
+	PessimistFood = Rule{
+		Name:        "Saving food",
+		Description: "+6 food for every villager that is pessimist",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Optimistic]; ok1 && v1.Love() == Hate {
+					steps = addSteps(steps, 8, &v.ID, Food, "Saving food")
+				}
+			}
+
+			return steps
+		},
+	}
+
+	OptimistTension = Rule{
+		Name:        "Optimist vs Pessimist",
+		Description: "-10 Health if there are optimist and pessimist together",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			if isConflict(n, Optimistic) {
+				steps = addSteps(steps, -10, nil, Health, "Optimist Conflict")
+			}
+			return steps
+		},
+	}
+
+	OptimistBoost = Rule{
+		Name:        "Optimist Boost",
+		Description: "+10 Happiness if there is a pessimist and at least 2 Optimists",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			var optimists []bool
+			var pessimist []bool
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Optimistic]; ok1 && v1.Love() == Love {
+					optimists = append(optimists, true)
+				}
+				if v1, ok1 := m[Optimistic]; ok1 && v1.Love() == Hate {
+					pessimist = append(pessimist, true)
+				}
+			}
+			if len(optimists) > 1 && len(pessimist) == 1 {
+				steps = addSteps(steps, 10, nil, Happiness, "Optimist Boost")
+			}
+			return steps
+		},
+	}
+
+	CowardFancy = Rule{
+		Name:        "Coward Fancy House",
+		Description: "+8 Happiness if coward villager lives in a Fancy house",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Adventurous]; ok1 && v1.Love() == Hate && v.House.Type == 4 {
+					steps = addSteps(steps, 8, &v.ID, Happiness, "Coward Fancy House")
+				}
+			}
+			return steps
+		},
+	}
+
+	AdventurousTend = Rule{
+		Name:        "Adventurous tend",
+		Description: "+8 Happiness if an adventurous villager lives in a tend",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Adventurous]; ok1 && v1.Love() == Love && v.House.Type == 3 {
+					steps = addSteps(steps, 8, &v.ID, Happiness, "Adventurous Tend")
+				}
+			}
+			return steps
+		},
+	}
+
+	ExtraRent = Rule{
+		Name:        "Extra Rent",
+		Description: "+5 Rent for each villager living in a Big or Fancy House",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				if v.House.Type == 4 || v.House.Type == 2 {
+					steps = addSteps(steps, 5, &v.ID, Money, "Extra rent")
+				}
+			}
+			return steps
+		},
+	}
+
+	ExtraSecurity = Rule{
+		Name:        "House Protection",
+		Description: "+3 Security for each villager leaving in Fancy House",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				if v.House.Type == 4 {
+					steps = addSteps(steps, 5, &v.ID, Money, "House protection")
+				}
+			}
+			return steps
+		},
+	}
+
+	TendMisery = Rule{
+		Name:        "Misery tend",
+		Description: "-3 Happiness for each villager leaving in a Tend",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				if v.House.Type == 3 {
+					steps = addSteps(steps, -3, &v.ID, Happiness, "Misery tend")
+				}
+			}
+			return steps
+		},
+	}
+
+	EatingTogether = Rule{
+		Name:        "Eating together",
+		Description: "+12 happiness if there is at least 1 villager loving cooking and another loving eating",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			var eating []string
+			var cooking []string
+			for _, v := range n {
+				m := v.Chars.charMap()
+				if v1, ok1 := m[Cooking]; ok1 && v1.Love() == Love {
+					cooking = append(cooking, v.ID)
+				}
+				if v1, ok1 := m[Eating]; ok1 && v1.Love() == Love {
+					eating = append(eating, v.ID)
+				}
+			}
+			if len(eating) == 0 || len(cooking) == 0 {
+				return steps
+			}
+			for _, v := range eating {
+				for _, j := range cooking {
+					if v != j {
+						steps = addSteps(steps, 12, nil, Happiness, "Eating together")
+					}
+				}
+			}
+			return steps
+		},
+	}
 )
+
+func isConflict(n NPCs, characteristic string) bool {
+	var side bool
+	var opposite bool
+	for _, v := range n {
+		m := v.Chars.charMap()
+		if v1, ok1 := m[characteristic]; ok1 {
+			switch v1.Love() {
+			case Love:
+				side = true
+			case Hate:
+				opposite = true
+			}
+		}
+	}
+	return side && opposite
+}
 
 var AllAvailableRules = []Rule{
 	CookingBonus,
@@ -491,6 +640,16 @@ var AllAvailableRules = []Rule{
 	TendsRule,
 	ThemeRule,
 	FancyHappinessRule,
+	OptimistTension,
+	PessimistFood,
+	OptimistBoost,
+	CowardFancy,
+	AdventurousTend,
+	ExtraRent,
+	ExtraSecurity,
+	TendMisery,
+	SpaceLover,
+	EatingTogether,
 }
 
 func RandomRule() Rule {

@@ -19,6 +19,7 @@ type State struct {
 	StatusEnded   *int
 	TownSillySong *audio.Player
 	MenuSong      *audio.Player
+	Difficulty    string
 }
 
 type Brainer interface {
@@ -35,8 +36,14 @@ type SceneMap struct {
 }
 
 func (s *SceneMap) AddNPC(npc *npc.NPC) {
+	for _, v := range s.NPCs {
+		if v.ID == npc.ID {
+			return
+		}
+	}
 	s.NPCs = append(s.NPCs, npc)
 }
+
 func (s *SceneMap) RemoveNPC(ID string) {
 	var npcs []*npc.NPC
 	for _, v := range s.NPCs {

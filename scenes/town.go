@@ -12,6 +12,7 @@ import (
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
 	"image/color"
+	"log/slog"
 	"math/rand"
 	"time"
 )
@@ -92,7 +93,7 @@ func (t *Town) Update() error {
 						DayStart:  t.state.Day + 1,
 						DayEnd:    t.state.Day + 3,
 						Stat:      values[rand.Intn(4)],
-						Value:     t.state.Day * v.NitPickyLevel,
+						Value:     8 + t.state.Day*v.NitPickyLevel,
 						Happiness: 3,
 					})
 					fmt.Printf("Adding wish stat %s value %d\n", v.Wishes[len(v.Wishes)-1].Stat, v.Wishes[len(v.Wishes)-1].Value)
@@ -181,6 +182,7 @@ func (t *Town) Draw(screen *ebiten.Image) {
 			t.TransitionSleep++
 		} else {
 			if t.endOfDay == nil {
+				t.NPCs = deduplicate(t.NPCs)
 				t.endOfDay = createShowEndOfDay(t.state.GameLogic.GetRuler(), t.NPCs, t.state.Day, t.state.Stats)
 			}
 		}
@@ -310,6 +312,7 @@ func (t *Town) KickOutHouse(npc *npc.NPC) {
 			newNpc.Y = 16 * 6
 			newNpc.Move = &common.Position{X: 16 * 6, Y: 16 * 6}
 			t.state.World["people"].AddNPC(&newNpc)
+			slog.With("id", npc.ID).Info("adding npc in entrance")
 			npc.Move = &common.Position{X: common.ScreenWidth + 16, Y: npc.Y}
 
 		}
@@ -332,38 +335,7 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 	}
 
 	if t.state.Status == InitialState {
-		t.state.Stats = make(map[string]int)
-		t.state.Stats[npc.Money] = 20
-		t.state.Stats[npc.Happiness] = 0
-		t.state.Stats[npc.Security] = 10
-		t.state.Stats[npc.Food] = 15
-		t.state.Stats[npc.Health] = 10
-		t.state.Stats[npc.Cultural] = 10
-		t.state.Day = 1
-
 		now := time.Now()
-		t.state.Goals = []world.Goal{
-			{
-				Day:       5,
-				Stat:      npc.Cultural,
-				Value:     30,
-				GiftStat:  npc.Food,
-				GiftValue: 10,
-			},
-			{
-				Day:       10,
-				Stat:      npc.Health,
-				Value:     30,
-				GiftStat:  npc.Security,
-				GiftValue: 50,
-			},
-			{
-				Day:       14,
-				Stat:      npc.Happiness,
-				Value:     100,
-				Mandatory: true,
-			},
-		}
 		t.Ack = &now
 		return
 	}
@@ -375,4 +347,18 @@ func (t *Town) PostTransition(st State, original stagehand.Scene[State]) {
 	}
 	t.state.Player.X, t.state.Player.Y = t.TransitionPoints.Position.X, t.TransitionPoints.Position.Y
 	t.state.Status = Playing
+}
+
+func deduplicate(n npc.NPCs) npc.NPCs {
+	var unique = make(map[string]*npc.NPC)
+	for _, v := range n {
+		if _, ok := unique[v.ID]; !ok {
+			unique[v.ID] = v
+		}
+	}
+	var result npc.NPCs
+	for _, v := range unique {
+		result = append(result, v)
+	}
+	return result
 }
