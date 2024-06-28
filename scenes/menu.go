@@ -89,9 +89,7 @@ func NewMenu(scene stagehand.Scene[State], logic Brainer) *MenuScene {
 
 		// add a handler that reacts to clicking the button
 		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
-			println("button clicked")
-			menu.state = menu.gameLogic.NextDay(State{})
-			menu.sm.SwitchWithTransition(menu.StartScene.Scene, stagehand.NewTicksTimedSlideTransition[State](menu.StartScene.Direction, time.Second*time.Duration(1)))
+			menu.StartGame()
 		}),
 
 		// Indicate that this button should not be submitted when enter or space are pressed
@@ -129,10 +127,25 @@ func (m *MenuScene) Draw(screen *ebiten.Image) {
 func (m *MenuScene) Load(st State, sm stagehand.SceneController[State]) {
 	m.state = st
 	m.sm = sm.(*stagehand.SceneManager[State])
+	if !m.state.MenuSong.IsPlaying() {
+		m.state.MenuSong.Play()
+	}
+	if m.state.TownSillySong.IsPlaying() {
+		m.state.TownSillySong.Pause()
+	}
 }
 
 func (m *MenuScene) Unload() State {
+	m.state.MenuSong.Pause()
+	if !m.state.TownSillySong.IsPlaying() {
+		m.state.TownSillySong.Play()
+	}
 	return m.state
+}
+
+func (m *MenuScene) StartGame() {
+	m.state = m.gameLogic.NextDay(m.state)
+	m.sm.SwitchWithTransition(m.StartScene.Scene, stagehand.NewTicksTimedSlideTransition[State](m.StartScene.Direction, time.Second*time.Duration(1)))
 }
 func loadButtonImage() (*widget.ButtonImage, error) {
 	idle := image.NewNineSliceColor(color.NRGBA{R: 170, G: 170, B: 180, A: 255})

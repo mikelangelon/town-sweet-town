@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	//go:embed Title.png
+	//go:embed vilaMaravilla.png
 	Title []byte
 
 	//go:embed tilemap_packed.png
@@ -55,4 +55,10 @@ var (
 
 	//go:embed holstein-regular.ttf
 	HolsteinFont []byte
+
+	//go:embed sea-9531.mp3
+	MenuLoop []byte
+
+	//go:embed eternal-loop-9211.mp3
+	TownSong []byte
 )

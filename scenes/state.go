@@ -1,6 +1,7 @@
 package scenes
 
 import (
+	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/mikelangelon/town-sweet-town/graphics"
 	"github.com/mikelangelon/town-sweet-town/world"
 	"github.com/mikelangelon/town-sweet-town/world/house"
@@ -8,14 +9,16 @@ import (
 )
 
 type State struct {
-	Player      *graphics.Char
-	Status      int
-	World       map[string]*SceneMap
-	Stats       map[string]int
-	Day         int
-	Goals       []world.Goal
-	GameLogic   Brainer
-	StatusEnded *int
+	Player        *graphics.Char
+	Status        int
+	World         map[string]*SceneMap
+	Stats         map[string]int
+	Day           int
+	Goals         []world.Goal
+	GameLogic     Brainer
+	StatusEnded   *int
+	TownSillySong *audio.Player
+	MenuSong      *audio.Player
 }
 
 type Brainer interface {

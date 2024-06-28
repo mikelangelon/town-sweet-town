@@ -53,8 +53,8 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 
 	switch day {
 	case 1:
-		char := g.CharFactory.NewChar(1, nil, 16*6, 16*6)
 
+		char := g.CharFactory.NewChar(1, nil, 16*6, 16*6)
 		fire := world.Fire{Char: g.FancyTownFactory.NewChar(470, nil, 16*6, 16*10)}
 		sWest := house.NewSignal(
 			g.TinyTownFactory.NewChar(83, nil, 16*4, 16*7),
@@ -93,6 +93,8 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 					},
 				},
 			},
+			MenuSong:      state.MenuSong,
+			TownSillySong: state.TownSillySong,
 		}
 	case 3:
 		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101, 304}, getPositionAvailable(), npc.WithRandom(4)))

@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/mikelangelon/town-sweet-town/logic"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"golang.org/x/image/font"
@@ -69,9 +72,12 @@ func main() {
 			npc.CompleteTownRule,
 		}},
 	}
+	townAudio, menuAudio := audios()
 	state := gameLogic.NextDay(scenes.State{})
 	state = scenes.State{
-		Status: scenes.Menu,
+		Status:        scenes.Menu,
+		MenuSong:      menuAudio,
+		TownSillySong: townAudio,
 	}
 	people1Scene := scenes.NewEntrance("people", people1)
 	town1Scene := scenes.NewTown("town1", town1)
@@ -103,4 +109,33 @@ func loadFont(size float64) (font.Face, error) {
 		DPI:     72,
 		Hinting: font.HintingFull,
 	}), nil
+}
+
+func audios() (*audio.Player, *audio.Player) {
+	var player, menuPlayer *audio.Player
+	{
+		audioContext := audio.NewContext(48000)
+		decoded, err := mp3.DecodeWithSampleRate(48000, bytes.NewReader(assets.TownSong))
+		if err != nil {
+			slog.With("error", err).Error("weird audio issue")
+		}
+
+		loop := audio.NewInfiniteLoop(decoded, decoded.Length())
+		player, err = audioContext.NewPlayer(loop)
+		if err != nil {
+			slog.With("error", err).Error("problem creating player")
+		}
+
+		decodedMenu, err := mp3.DecodeWithSampleRate(48000, bytes.NewReader(assets.MenuLoop))
+		if err != nil {
+			slog.With("error", err).Error("weird audio issue")
+		}
+
+		loopMenu := audio.NewInfiniteLoop(decodedMenu, decodedMenu.Length())
+		menuPlayer, err = audioContext.NewPlayer(loopMenu)
+		if err != nil {
+			slog.With("error", err).Error("problem creating player")
+		}
+	}
+	return player, menuPlayer
 }

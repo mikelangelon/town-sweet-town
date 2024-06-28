@@ -36,7 +36,7 @@ func (t *Town) Update() error {
 		return nil
 	}
 	if t.state.Status == HappyEnd || t.state.Status == GameOver {
-		t.state.Status = InitialState
+		t.state.Status = Menu
 		return nil
 	}
 	if t.state.Status == InitialState {
@@ -54,8 +54,8 @@ func (t *Town) Update() error {
 			"To recruit villagers for your town,\ngo to the east.",
 			"Every 2 days new people will come there.",
 			"To end the day,\npress ENTER next to the fire.",
-			"Villagers have their own characteristics, \ntheir combinations would make improve or decrease \nyour town stats.",
-			"There are some active rules that you will need to be aware.\nPress ENTER to see them.",
+			"There are some active rules that you will need to be aware \nto improve your town stats.\nPress ENTER to see them.",
+			"Most of them are based on villager stats. \nCombine them to improve your village!",
 			"Every day new rules\nwill come up!",
 			"You have 2 weeks! Don't fail me!",
 		})
@@ -316,6 +316,9 @@ func (t *Town) PreTransition(destination stagehand.Scene[State]) State {
 
 func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 	t.BaseScene.Load(st, sm)
+	//if !t.state.TownSillySong.IsPlaying() {
+	//	t.state.TownSillySong.Play()
+	//}
 
 	for _, v := range t.state.World["town1"].Houses {
 		t.MapScene.Child = append(t.MapScene.Child, &v.House)

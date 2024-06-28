@@ -15,3 +15,7 @@ There are some hidden rules to make your town happy, you have 5 days for your ta
 https://kenney.nl/assets/tiny-town
 https://kenney.nl/assets/roguelike-characters
 https://www.1001fonts.com/holstein-font.html
+
+Music by nojisuma 
+https://pixabay.com/music/upbeat-sea-9531/
+https://pixabay.com/music/jingles-eternal-loop-9211/
