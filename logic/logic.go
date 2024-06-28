@@ -50,13 +50,6 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 		g.positionAvailable = positionAvailable
 	}
 
-	getPositionAvailable := func() common.Position {
-		index := rand.Intn(len(g.positionAvailable))
-		pos := g.positionAvailable[index]
-		g.positionAvailable = append(g.positionAvailable[:index], g.positionAvailable[index+1:]...)
-		return pos
-	}
-
 	switch day {
 	case 1:
 		char := g.CharFactory.NewChar(1, nil, 16*6, 16*6)
@@ -77,6 +70,11 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 			g.TinyTownFactory.NewChar(83, nil, 16*8, 16*17),
 			"South",
 			common.Position{X: 16 * 7, Y: 16 * 12})
+		sPeople := house.NewSignal(
+			g.TinyTownFactory.NewChar(83, nil, 16*3, 16*4),
+			"People",
+			common.Position{X: 16 * 3, Y: 16 * 4})
+		sPeople.Cost = 2
 
 		stats := make(map[string]int)
 		stats[npc.Money] = 10 * ratio(state.Difficulty)
@@ -123,11 +121,12 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 				},
 				"people": {
 					NPCs: []*npc.NPC{
-						g.NPCFactory.NewNPC(54, []int{11, 22}, getPositionAvailable(), npc.WithRandom(3)),
-						g.NPCFactory.NewNPC(162, []int{11, 22}, getPositionAvailable(), npc.WithRandom(3)),
-						g.NPCFactory.NewNPC(271, nil, getPositionAvailable(), npc.WithRandom(3)),
-						g.NPCFactory.NewNPC(162, []int{389, 476, 312}, getPositionAvailable(), npc.WithRandom(4)),
+						g.NPCFactory.NewNPC(54, []int{11, 22}, g.getPositionAvailable(), npc.WithRandom(3)),
+						g.NPCFactory.NewNPC(162, []int{11, 22}, g.getPositionAvailable(), npc.WithRandom(3)),
+						g.NPCFactory.NewNPC(271, nil, g.getPositionAvailable(), npc.WithRandom(3)),
+						g.NPCFactory.NewNPC(162, []int{389, 476, 312}, g.getPositionAvailable(), npc.WithRandom(4)),
 					},
+					Objects: []world.Object{sPeople},
 				},
 			},
 			Stats:         stats,
@@ -136,26 +135,26 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 			TownSillySong: state.TownSillySong,
 		}
 	case 3:
-		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101, 304}, getPositionAvailable(), npc.WithRandom(4)))
-		entrance.AddNPC(g.NPCFactory.NewNPC(54, []int{12, 104, 561}, getPositionAvailable(), npc.WithRandom(4)))
-		entrance.AddNPC(g.NPCFactory.NewNPC(109, []int{13, 300, 197}, getPositionAvailable(), npc.WithRandom(4)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101, 304}, g.getPositionAvailable(), npc.WithRandom(4)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(54, []int{12, 104, 561}, g.getPositionAvailable(), npc.WithRandom(4)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(109, []int{13, 300, 197}, g.getPositionAvailable(), npc.WithRandom(4)))
 	case 5:
-		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101}, getPositionAvailable(), npc.WithRandom(5)))
-		entrance.AddNPC(g.NPCFactory.NewNPC(0, []int{12, 104, 478}, getPositionAvailable(), npc.WithRandom(5)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101}, g.getPositionAvailable(), npc.WithRandom(5)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(0, []int{12, 104, 478}, g.getPositionAvailable(), npc.WithRandom(5)))
 	case 7:
-		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101}, getPositionAvailable(), npc.WithRandom(5)))
-		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{12, 104, 478}, getPositionAvailable(), npc.WithRandom(7)))
-		entrance.AddNPC(g.NPCFactory.NewNPC(163, []int{12}, getPositionAvailable(), npc.WithRandom(8)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101}, g.getPositionAvailable(), npc.WithRandom(5)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{12, 104, 478}, g.getPositionAvailable(), npc.WithRandom(7)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(163, []int{12}, g.getPositionAvailable(), npc.WithRandom(8)))
 	case 9:
-		entrance.AddNPC(g.NPCFactory.NewNPC(487, []int{}, getPositionAvailable(), npc.WithRandom(5)))
-		entrance.AddNPC(g.NPCFactory.NewNPC(108, []int{12, 104, 478}, getPositionAvailable(), npc.WithRandom(7)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(487, []int{}, g.getPositionAvailable(), npc.WithRandom(5)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(108, []int{12, 104, 478}, g.getPositionAvailable(), npc.WithRandom(7)))
 	case 11:
-		entrance.AddNPC(g.NPCFactory.NewNPC(0, []int{11, 101}, getPositionAvailable(), npc.WithRandom(6)))
-		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{12, 104, 478}, getPositionAvailable(), npc.WithRandom(7)))
-		entrance.AddNPC(g.NPCFactory.NewNPC(163, []int{12}, getPositionAvailable(), npc.WithRandom(8)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(0, []int{11, 101}, g.getPositionAvailable(), npc.WithRandom(6)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{12, 104, 478}, g.getPositionAvailable(), npc.WithRandom(7)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(163, []int{12}, g.getPositionAvailable(), npc.WithRandom(8)))
 	case 13:
-		entrance.AddNPC(g.NPCFactory.NewNPC(54, []int{11, 101}, getPositionAvailable(), npc.WithRandom(7)))
-		entrance.AddNPC(g.NPCFactory.NewNPC(163, []int{12, 104, 478}, getPositionAvailable(), npc.WithRandom(8)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(54, []int{11, 101}, g.getPositionAvailable(), npc.WithRandom(7)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(163, []int{12, 104, 478}, g.getPositionAvailable(), npc.WithRandom(8)))
 	}
 	g.RulesApplier.Rules = append(g.RulesApplier.Rules, npc.RandomRule())
 	state.Day = day
@@ -172,4 +171,16 @@ func ratio(difficulty string) int {
 		return 3
 	}
 	return 0
+}
+
+func (g GameLogic) AddNPC() *npc.NPC {
+	options := []int{270, 271, 324, 325, 378, 379, 432, 433, 486, 487, 540, 541, 594, 595}
+	return g.NPCFactory.NewNPC(options[rand.Intn(len(options))], nil, g.getPositionAvailable(), npc.WithRandom(5))
+}
+
+func (g GameLogic) getPositionAvailable() common.Position {
+	index := rand.Intn(len(g.positionAvailable))
+	pos := g.positionAvailable[index]
+	g.positionAvailable = append(g.positionAvailable[:index], g.positionAvailable[index+1:]...)
+	return pos
 }

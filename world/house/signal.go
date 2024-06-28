@@ -10,6 +10,8 @@ type Signal struct {
 	HousePlace   common.Position
 	House        *House
 	HouseOptions *[]string
+
+	Cost int
 }
 
 func NewSignal(char *graphics.Char, id string, housePlace common.Position) *Signal {

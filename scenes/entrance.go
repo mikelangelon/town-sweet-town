@@ -1,10 +1,12 @@
 package scenes
 
 import (
+	"fmt"
 	"github.com/joelschutz/stagehand"
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
 	"github.com/mikelangelon/town-sweet-town/textbox"
+	"github.com/mikelangelon/town-sweet-town/world/house"
 	"github.com/mikelangelon/town-sweet-town/world/npc"
 	"github.com/solarlune/resolv"
 	"log/slog"
@@ -41,6 +43,9 @@ func (e *Entrance) Update() error {
 func (e *Entrance) Action(collision *resolv.Collision) {
 	if c, ok := collision.Objects[0].Data.(*npc.NPC); ok {
 		e.TalkToNPC(c)
+	}
+	if c, ok := collision.Objects[0].Data.(*house.Signal); ok {
+		e.SignalAction(c)
 	}
 }
 
@@ -87,4 +92,24 @@ func (e *Entrance) PreTransition(destination stagehand.Scene[State]) State {
 func (e *Entrance) PostTransition(st State, original stagehand.Scene[State]) {
 	e.state.Player.X, e.state.Player.Y = e.TransitionPoints.Position.X, e.TransitionPoints.Position.Y
 	e.state.Status = Playing
+}
+
+func (e *Entrance) SignalAction(signal *house.Signal) {
+	var question = fmt.Sprintf("Do you want to pay %d coins for another person?", signal.Cost)
+	e.Text.ShowAndQuestion([]string{question}, []string{"Yes", textbox.NoResponse},
+		func(answer string) {
+			if answer == textbox.NoResponse {
+				return
+			}
+			if e.state.Stats["money"] < signal.Cost {
+				e.Text.ShowAndQuestion([]string{"", "Not enough money. Sorry"}, nil, func(s string) {})
+				return
+			}
+			n := e.state.GameLogic.AddNPC()
+			e.NPCs = append(e.NPCs, n)
+			e.state.World["people"].AddNPC(n)
+			e.state.Stats[npc.Money] -= signal.Cost
+			signal.Cost += 1
+		},
+	)
 }

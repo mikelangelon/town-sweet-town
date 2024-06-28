@@ -27,6 +27,7 @@ type Brainer interface {
 	CreateHouse(id string, typ int) house.House
 	GetRuler() npc.RuleApplier
 	ChangePlayer(state State) State
+	AddNPC() *npc.NPC
 }
 
 type SceneMap struct {
