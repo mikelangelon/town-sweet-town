@@ -137,6 +137,9 @@ func (c *TextBox) Next() {
 		return
 	}
 	c.visible = false
+	c.Options = nil
+	c.SelectedOption = 0
+	c.PersonName = nil
 }
 
 func (c *TextBox) Show(text []string) {

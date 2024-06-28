@@ -244,9 +244,17 @@ func (t *Town) SignalAction(signal house.Signal) {
 		options = house.MapHouseBulding.GiveMeThree()
 		signal.HouseOptions = options
 	}
+	var question = "Which house do you want to build?"
+	var existingHouse *house.House
+	for _, v := range t.state.World["town1"].Houses {
+		if v.House.Offset == signal.HousePlace {
+			existingHouse = v
+			question = "Which upgrade do you want?"
+		}
+	}
 
 	t.Text.ShowAndQuestion(
-		[]string{"Which house do you want to build?"},
+		[]string{question},
 		append(options,
 			textbox.NoResponse),
 		func(answer string) {
@@ -262,8 +270,14 @@ func (t *Town) SignalAction(signal house.Signal) {
 			newHouse := t.state.GameLogic.CreateHouse(fmt.Sprintf("%s %s", info.Name, signal.ID), info.Type)
 			newHouse.House.Offset = signal.HousePlace
 			newHouse.Type = info.Type
-			t.MapScene.Child = append(t.MapScene.Child, &newHouse.House)
-			t.state.World["town1"].Houses = append(t.state.World["town1"].Houses, &newHouse)
+			if existingHouse == nil {
+				t.MapScene.Child = append(t.MapScene.Child, &newHouse.House)
+				t.state.World["town1"].Houses = append(t.state.World["town1"].Houses, &newHouse)
+				return
+			}
+			existingHouse.House = newHouse.House
+			existingHouse.Type = newHouse.Type
+
 		},
 	)
 }
@@ -309,7 +323,7 @@ func (t *Town) Load(st State, sm stagehand.SceneController[State]) {
 
 	if t.state.Status == InitialState {
 		t.state.Stats = make(map[string]int)
-		t.state.Stats[npc.Money] = 10
+		t.state.Stats[npc.Money] = 20
 		t.state.Stats[npc.Happiness] = 0
 		t.state.Stats[npc.Security] = 10
 		t.state.Stats[npc.Food] = 15

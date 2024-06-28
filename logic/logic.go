@@ -94,32 +94,29 @@ func (g GameLogic) NextDay(state scenes.State) scenes.State {
 				},
 			},
 		}
-	case 2:
-		g.RulesApplier.Rules = append(g.RulesApplier.Rules, npc.RandomRule())
-		g.RulesApplier.Rules = append(g.RulesApplier.Rules, npc.RandomRule())
 	case 3:
 		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101, 304}, getPositionAvailable(), npc.WithRandom(4)))
 		entrance.AddNPC(g.NPCFactory.NewNPC(54, []int{12, 104, 561}, getPositionAvailable(), npc.WithRandom(4)))
 		entrance.AddNPC(g.NPCFactory.NewNPC(109, []int{13, 300, 197}, getPositionAvailable(), npc.WithRandom(4)))
-	case 4:
-		g.RulesApplier.Rules = append(g.RulesApplier.Rules, npc.RandomRule())
-		g.RulesApplier.Rules = append(g.RulesApplier.Rules, npc.RandomRule())
 	case 5:
 		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101}, getPositionAvailable(), npc.WithRandom(5)))
 		entrance.AddNPC(g.NPCFactory.NewNPC(0, []int{12, 104, 478}, getPositionAvailable(), npc.WithRandom(5)))
 	case 7:
 		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{11, 101}, getPositionAvailable(), npc.WithRandom(5)))
 		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{12, 104, 478}, getPositionAvailable(), npc.WithRandom(7)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(163, []int{12}, getPositionAvailable(), npc.WithRandom(8)))
 	case 9:
 		entrance.AddNPC(g.NPCFactory.NewNPC(487, []int{}, getPositionAvailable(), npc.WithRandom(5)))
 		entrance.AddNPC(g.NPCFactory.NewNPC(108, []int{12, 104, 478}, getPositionAvailable(), npc.WithRandom(7)))
 	case 11:
 		entrance.AddNPC(g.NPCFactory.NewNPC(0, []int{11, 101}, getPositionAvailable(), npc.WithRandom(6)))
 		entrance.AddNPC(g.NPCFactory.NewNPC(1, []int{12, 104, 478}, getPositionAvailable(), npc.WithRandom(7)))
+		entrance.AddNPC(g.NPCFactory.NewNPC(163, []int{12}, getPositionAvailable(), npc.WithRandom(8)))
 	case 13:
 		entrance.AddNPC(g.NPCFactory.NewNPC(54, []int{11, 101}, getPositionAvailable(), npc.WithRandom(7)))
 		entrance.AddNPC(g.NPCFactory.NewNPC(163, []int{12, 104, 478}, getPositionAvailable(), npc.WithRandom(8)))
 	}
+	g.RulesApplier.Rules = append(g.RulesApplier.Rules, npc.RandomRule())
 	state.Day = day
 	return state
 }
