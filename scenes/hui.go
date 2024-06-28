@@ -10,21 +10,24 @@ import (
 )
 
 type hui struct {
-	lMoney, lFood, lHappiness, lHealth, lSecurity, lCultural *widget.Text
-	ui                                                       ebitenui.UI
+	lDay, lMoney, lFood, lHappiness, lHealth, lSecurity, lCultural *widget.Text
+	ui                                                             ebitenui.UI
 }
 
 func NewHUI() *hui {
 	rootContainer := widget.NewContainer(
 		widget.ContainerOpts.BackgroundImage(imageNine.NewNineSliceColor(color.NRGBA{0x13, 0x1a, 0x22, 100})),
 		widget.ContainerOpts.Layout(widget.NewGridLayout(
-			widget.GridLayoutOpts.Columns(3),
+			widget.GridLayoutOpts.Columns(4),
 			widget.GridLayoutOpts.Padding(widget.NewInsetsSimple(5)),
 			widget.GridLayoutOpts.Spacing(5, 5),
 			widget.GridLayoutOpts.Stretch([]bool{true, true, true}, []bool{true, true, true}),
 		)),
 	)
 	face, _ := loadFont(12)
+	lDay := widget.NewText(
+		widget.TextOpts.Text("Day: 1", face, color.RGBA{240, 240, 20, 255}),
+	)
 	lMoney := widget.NewText(
 		widget.TextOpts.Text("Money: 000", face, color.White),
 	)
@@ -43,9 +46,13 @@ func NewHUI() *hui {
 	lCultural := widget.NewText(
 		widget.TextOpts.Text("Cultural: 000", face, color.White),
 	)
+	rootContainer.AddChild(lDay)
 	rootContainer.AddChild(lMoney)
 	rootContainer.AddChild(lHappiness)
 	rootContainer.AddChild(lHealth)
+	rootContainer.AddChild(widget.NewText(
+		widget.TextOpts.Text("", face, color.White),
+	))
 	rootContainer.AddChild(lFood)
 	rootContainer.AddChild(lSecurity)
 	rootContainer.AddChild(lCultural)
@@ -55,6 +62,7 @@ func NewHUI() *hui {
 		Container: rootContainer,
 	}
 	return &hui{
+		lDay:       lDay,
 		lMoney:     lMoney,
 		lFood:      lFood,
 		lHappiness: lHappiness,
@@ -65,7 +73,8 @@ func NewHUI() *hui {
 	}
 }
 
-func (h *hui) Update(stats map[string]int) {
+func (h *hui) Update(stats map[string]int, day int) {
+	h.lDay.Label = fmt.Sprintf("Day: %d", day)
 	h.lMoney.Label = fmt.Sprintf("Money: %03d", stats[npc.Money])
 	h.lFood.Label = fmt.Sprintf("Food: %03d", stats[npc.Food])
 	h.lHappiness.Label = fmt.Sprintf("Happiness: %03d", stats[npc.Happiness])

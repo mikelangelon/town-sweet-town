@@ -54,7 +54,7 @@ func (bs *BaseScene) Update() (bool, error) {
 		return true, nil
 	}
 	if bs.ui != nil {
-		bs.ui.Update(bs.state.Stats)
+		bs.ui.Update(bs.state.Stats, bs.state.Day)
 	}
 	if bs.state.Status != Playing {
 		return true, nil
@@ -124,8 +124,8 @@ func (bs *BaseScene) Draw(screen *ebiten.Image) {
 	bs.Text.Draw(screen)
 	if bs.ui != nil {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(500, 0)
-		bg := ebiten.NewImage(300, 60)
+		op.GeoM.Translate(400, 0)
+		bg := ebiten.NewImage(400, 60)
 		bs.ui.ui.Draw(bg)
 		screen.DrawImage(bg, op)
 	}
