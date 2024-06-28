@@ -123,7 +123,7 @@ const (
 	Optimistic  = "Optimistic"
 	Adventurous = "Adventurous"
 
-	Workaholic = "to Work"
+	Workaholic = "Working"
 	Sports     = "Sports"
 	Reading    = "Reading"
 	Cooking    = "Cooking"

@@ -218,7 +218,7 @@ func (t *Town) Action(collision *resolv.Collision) {
 	if _, ok := collision.Objects[0].Data.(world.Fire); ok {
 		t.FireAction()
 	}
-	if c, ok := collision.Objects[0].Data.(house.Signal); ok {
+	if c, ok := collision.Objects[0].Data.(*house.Signal); ok {
 		t.SignalAction(c)
 	}
 
@@ -238,11 +238,10 @@ func (t *Town) FireAction() {
 	)
 }
 
-func (t *Town) SignalAction(signal house.Signal) {
-	options := signal.HouseOptions
-	if len(options) == 0 {
-		options = house.MapHouseBulding.GiveMeThree()
-		signal.HouseOptions = options
+func (t *Town) SignalAction(signal *house.Signal) {
+	if signal.HouseOptions == nil {
+		options := house.MapHouseBulding.GiveMeThree()
+		signal.HouseOptions = &options
 	}
 	var question = "Which house do you want to build?"
 	var existingHouse *house.House
@@ -255,7 +254,7 @@ func (t *Town) SignalAction(signal house.Signal) {
 
 	t.Text.ShowAndQuestion(
 		[]string{question},
-		append(options,
+		append(*signal.HouseOptions,
 			textbox.NoResponse),
 		func(answer string) {
 			if answer == textbox.NoResponse {
@@ -266,6 +265,7 @@ func (t *Town) SignalAction(signal house.Signal) {
 				t.Text.ShowAndQuestion([]string{"", "Not enough money. Sorry"}, nil, func(s string) {})
 				return
 			}
+			signal.HouseOptions = house.MapHouseBulding.ReplaceThree(*signal.HouseOptions, answer)
 			t.state.Stats["money"] -= info.Cost
 			newHouse := t.state.GameLogic.CreateHouse(fmt.Sprintf("%s %s", info.Name, signal.ID), info.Type)
 			newHouse.House.Offset = signal.HousePlace

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
+	"slices"
 )
 
 const (
@@ -79,4 +80,20 @@ func (m MapHouseInfo) GiveMeThree() []string {
 		}
 	}
 	return three
+}
+
+func (m MapHouseInfo) ReplaceThree(current []string, toReplace string) *[]string {
+	var result []string
+	for _, v := range current {
+		if v != toReplace {
+			result = append(result, v)
+		}
+	}
+	for k, _ := range m {
+		if !slices.Contains(current, k) {
+			result = append(result, k)
+			return &result
+		}
+	}
+	return &result
 }

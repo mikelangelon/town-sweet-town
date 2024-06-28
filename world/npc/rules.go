@@ -66,14 +66,6 @@ var (
 		},
 	}
 
-	NoFood = Rule{
-		Name:        "No food",
-		Description: "-20 Health if there is no food",
-		Func: func(n NPCs, steps []StatStep) []StatStep {
-			return addSteps(steps, -2*(len(n)+1), nil, Food, fmt.Sprintf("%d Villagers + yourself", len(n)))
-		},
-	}
-
 	RentRule = Rule{
 		Name:        "Rent",
 		Description: "Every villager pays their rent (+X money)",
@@ -85,6 +77,73 @@ var (
 				}
 			}
 			return steps
+		},
+	}
+
+	RoofRule = Rule{
+		Name:        "Having a roof",
+		Description: "+1 happiness for every villager",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			return addSteps(steps, len(n), nil, Happiness, fmt.Sprintf("%d Villagers having a house", len(n)))
+		},
+	}
+
+	CompleteTownRule = Rule{
+		Name:        "Town completed",
+		Description: "+3 happiness if you have 4 villagers",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			if len(n) > 4 {
+				return addSteps(steps, 3, nil, Happiness, "Town completed")
+			}
+			return steps
+		},
+	}
+
+	TendsRule = Rule{
+		Name:        "Camping life",
+		Description: "+5 happiness if there are at least 2 villagers living in a tend",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			var count = 0
+			for _, v := range n {
+				if v.House.Type == 3 {
+					count++
+				}
+			}
+			if count > 1 {
+				return addSteps(steps, 5, nil, Happiness, "Camping life")
+			}
+			return steps
+		},
+	}
+
+	FancyHappinessRule = Rule{
+		Name:        "Fancy house",
+		Description: "+4 happiness for every villager living in a fancy house",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			for _, v := range n {
+				if v.House.Type == 4 {
+					steps = addSteps(steps, 4, &v.ID, Happiness, "Living in a fancy house")
+				}
+			}
+			return steps
+		},
+	}
+
+	ThemeRule = Rule{
+		Name:        "Theme town",
+		Description: "+3 happiness if all houses are the same style",
+		Func: func(n NPCs, steps []StatStep) []StatStep {
+			var style *int
+			for _, v := range n {
+				if style == nil {
+					style = &v.House.Type
+					continue
+				}
+				if *style != v.House.Type {
+					return steps
+				}
+			}
+			return addSteps(steps, 3, nil, Happiness, "Theme town")
 		},
 	}
 
@@ -104,7 +163,7 @@ var (
 
 	EatingTooMuch = Rule{
 		Name:        "Eating too much",
-		Description: "-4 food for every villager that likes eatings",
+		Description: "-4 food for every villager that likes eating",
 		Func: func(n NPCs, steps []StatStep) []StatStep {
 			for _, v := range n {
 				m := v.Chars.charMap()
@@ -192,7 +251,7 @@ var (
 			for _, v := range n {
 				m := v.Chars.charMap()
 				if v1, ok1 := m[Workaholic]; ok1 && v1.Love() == Love {
-					steps = addSteps(steps, 5, &v.ID, Money, "Works too much")
+					steps = addSteps(steps, 5, &v.ID, Money, "Generates extra money")
 				}
 			}
 			return steps
@@ -201,12 +260,12 @@ var (
 
 	ExtrovertPower = Rule{
 		Name:        "Extrovert Power",
-		Description: "+3 for extrovert person",
+		Description: "+3 happiness for extrovert person",
 		Func: func(n NPCs, steps []StatStep) []StatStep {
 			for _, v := range n {
 				m := v.Chars.charMap()
-				if v1, ok1 := m[Workaholic]; ok1 && v1.Love() == Love {
-					steps = addSteps(steps, 5, &v.ID, Health, "Works too much")
+				if v1, ok1 := m[Happiness]; ok1 && v1.Love() == Love {
+					steps = addSteps(steps, 5, &v.ID, Happiness, "Extrovert Power")
 				}
 			}
 			return steps
@@ -215,7 +274,7 @@ var (
 
 	IntrovertCulture = Rule{
 		Name:        "Introvert Culture",
-		Description: "+4 Culture for every",
+		Description: "+4 Culture for every introvert that likes culture",
 		Func: func(n NPCs, steps []StatStep) []StatStep {
 			for _, v := range n {
 				m := v.Chars.charMap()
@@ -233,7 +292,7 @@ var (
 
 	CultureLeak = Rule{
 		Name:        "Culture Leak",
-		Description: "-3 Culture for every person not loving Reading or Music",
+		Description: "-3 Culture for every person hating Reading or Music",
 		Func: func(n NPCs, steps []StatStep) []StatStep {
 			for _, v := range n {
 				m := v.Chars.charMap()
@@ -415,7 +474,9 @@ var AllAvailableRules = []Rule{
 	CompetitionTooMuch,
 	EatingTooMuch,
 	GoodCulture,
+	BadCulture,
 	WorkTooMuch,
+	WorkingPower,
 	HealthyGuy,
 	OptimisticThief,
 	AnimalLovers,
@@ -427,6 +488,9 @@ var AllAvailableRules = []Rule{
 	CultureLeak,
 	IntrovertCulture,
 	ExtrovertPower,
+	TendsRule,
+	ThemeRule,
+	FancyHappinessRule,
 }
 
 func RandomRule() Rule {

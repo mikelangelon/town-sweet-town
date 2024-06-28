@@ -65,6 +65,8 @@ func main() {
 		RulesApplier: &npc.RuleApplier{Rules: []npc.Rule{
 			npc.RentRule,
 			npc.EatingRule,
+			npc.RoofRule,
+			npc.CompleteTownRule,
 		}},
 	}
 	state := gameLogic.NextDay(scenes.State{})

@@ -9,14 +9,14 @@ type Signal struct {
 	*graphics.Char
 	HousePlace   common.Position
 	House        *House
-	HouseOptions []string
+	HouseOptions *[]string
 }
 
-func NewSignal(char *graphics.Char, id string, housePlace common.Position) Signal {
+func NewSignal(char *graphics.Char, id string, housePlace common.Position) *Signal {
 	s := Signal{
 		Char:       char,
 		HousePlace: housePlace,
 	}
 	s.ID = id
-	return s
+	return &s
 }
