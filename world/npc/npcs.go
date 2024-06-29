@@ -61,7 +61,7 @@ func (n NPCs) ApplyWishesString(day int) []string {
 		}
 		for _, j := range v.Wishes {
 			if j.DayStart == day {
-				result = append(result, fmt.Sprintf("%s wishes the town should have more %s", v.ID, j.Stat))
+				result = append(result, fmt.Sprintf("%s wishes the village should have more %s", v.ID, j.Stat))
 			}
 		}
 	}

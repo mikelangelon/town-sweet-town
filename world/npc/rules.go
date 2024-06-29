@@ -93,7 +93,7 @@ var (
 		Description: "+3 happiness if you have 4 villagers",
 		Func: func(n NPCs, steps []StatStep) []StatStep {
 			if len(n) > 4 {
-				return addSteps(steps, 3, nil, Happiness, "Town completed")
+				return addSteps(steps, 3, nil, Happiness, "Village completed")
 			}
 			return steps
 		},
@@ -144,7 +144,7 @@ var (
 	}
 
 	ThemeRule = Rule{
-		Name:        "Theme town",
+		Name:        "Thematic village",
 		Description: "+3 happiness if all houses are the same style",
 		Func: func(n NPCs, steps []StatStep) []StatStep {
 			var style *int
@@ -157,7 +157,7 @@ var (
 					return steps
 				}
 			}
-			return addSteps(steps, 3, nil, Happiness, "Theme town")
+			return addSteps(steps, 3, nil, Happiness, "Thematic village")
 		},
 	}
 

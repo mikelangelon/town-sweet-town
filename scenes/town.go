@@ -61,12 +61,12 @@ func (t *Town) Update() error {
 		t.state.Status = InitExplanation
 		t.Text.Show([]string{
 			"Hello there! \nLet me introduce you a bit on the rules of this world. \nYou can move with the arrows\nPress ENTER to do an action.\n(As passing this dialog)",
-			"You are the architect of this town,\nyour goal is to build a happy community in 2 weeks.",
+			"You are the architect of this village,\nyour goal is to build a happy community in 2 weeks.",
 			"To build a house, press ENTER next to a signal post.\nYou will need money for it.\n(See top values)",
 			"To recruit villagers for your town,\ngo to the east.",
 			"Every 2 days new people will come there.",
 			"To end the day,\npress ENTER next to the fire.",
-			"There are some active rules that you will need to be aware \nto improve your town stats.\nPress ENTER to see them.",
+			"There are some active rules that you will need to be aware \nto improve your village stats.\nPress ENTER to see them.",
 			"Most of them are based on villager stats. \nCombine them to improve your village!",
 			"Every day new rules\nwill come up!",
 			"You have 2 weeks! Don't fail me!",

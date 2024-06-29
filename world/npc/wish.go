@@ -18,11 +18,11 @@ type CompleteWish struct {
 type CompleteWishes []CompleteWish
 
 func (c CompleteWish) String() string {
-	return fmt.Sprintf("%s wishes the town should have more %s", c.NPC.ID, c.Wish.Stat)
+	return fmt.Sprintf("%s wishes the village would have more %s", c.NPC.ID, c.Wish.Stat)
 }
 
 func (w Wish) IamText() string {
-	return fmt.Sprintf("I wish the town should have more %s", w.Stat)
+	return fmt.Sprintf("I wish the village would have more %s", w.Stat)
 }
 
 func (c CompleteWishes) String() []string {
