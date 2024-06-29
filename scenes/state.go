@@ -2,6 +2,7 @@ package scenes
 
 import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/mikelangelon/town-sweet-town/common"
 	"github.com/mikelangelon/town-sweet-town/graphics"
 	"github.com/mikelangelon/town-sweet-town/world"
 	"github.com/mikelangelon/town-sweet-town/world/house"
@@ -28,6 +29,8 @@ type Brainer interface {
 	GetRuler() npc.RuleApplier
 	ChangePlayer(state State) State
 	AddNPC() *npc.NPC
+	Reset()
+	GetPositionAvailable() common.Position
 }
 
 type SceneMap struct {

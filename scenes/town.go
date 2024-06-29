@@ -40,6 +40,7 @@ func (t *Town) Update() error {
 	if !t.Text.Visible() && t.state.Status == GoingToMenu {
 		t.sm.SwitchWithTransition(t.MenuScene.Scene, stagehand.NewTicksTimedSlideTransition[State](t.MenuScene.Direction, time.Millisecond*time.Duration(200)))
 		t.state.Day = 0
+		t.state.GameLogic.Reset()
 		t.state.Status = Menu
 	}
 	if !t.Text.Visible() && t.state.Status == HappyEnd {
@@ -135,10 +136,12 @@ func (t *Town) Update() error {
 
 			var dyingNPC string
 			if t.state.Stats[npc.Food] < 0 {
-				dyingNPC = t.NPCs[rand.Intn(len(t.NPCs))].ID
-				removeNPC(dyingNPC, "died due to the lack of food")
-				byebyeNPCsMessages = append(byebyeNPCsMessages, "Good news! Now you have additional food!")
-				t.state.Stats[npc.Food] += 5
+				if len(t.NPCs) > 0 {
+					dyingNPC = t.NPCs[rand.Intn(len(t.NPCs))].ID
+					removeNPC(dyingNPC, "died due to the lack of food")
+					byebyeNPCsMessages = append(byebyeNPCsMessages, "Good news! Now you have additional food!")
+					t.state.Stats[npc.Food] += 5
+				}
 			}
 			// Leaving NPCs due to wishes
 			for _, v := range t.endOfDay.leavingNPCs {
@@ -308,9 +311,10 @@ func (t *Town) KickOutHouse(npc *npc.NPC) {
 			}
 			t.state.World["town1"].RemoveNPC(npc.ID)
 			newNpc := *npc
-			newNpc.X = 16 * 20
-			newNpc.Y = 16 * 6
-			newNpc.Move = &common.Position{X: 16 * 6, Y: 16 * 6}
+			position := t.state.GameLogic.GetPositionAvailable()
+			newNpc.X = position.X
+			newNpc.Y = position.Y
+			newNpc.Move = &common.Position{X: position.X - 7*16, Y: position.Y}
 			t.state.World["people"].AddNPC(&newNpc)
 			slog.With("id", npc.ID).Info("adding npc in entrance")
 			npc.Move = &common.Position{X: common.ScreenWidth + 16, Y: npc.Y}
