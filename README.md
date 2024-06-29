@@ -25,10 +25,10 @@ And it allowed me to try new libraries!
 
 ## Assets
 
-https://kenney.nl/assets/tiny-town
-https://kenney.nl/assets/roguelike-characters
-https://www.1001fonts.com/holstein-font.html
+- https://kenney.nl/assets/tiny-town
+- https://kenney.nl/assets/roguelike-characters
+- https://www.1001fonts.com/holstein-font.html
 
 Music by nojisuma 
-https://pixabay.com/music/upbeat-sea-9531/
-https://pixabay.com/music/jingles-eternal-loop-9211/
+- https://pixabay.com/music/upbeat-sea-9531/
+- https://pixabay.com/music/jingles-eternal-loop-9211/
