@@ -66,7 +66,6 @@ func NewMenu(scene stagehand.Scene[State], logic Brainer) *MenuScene {
 	rootContainer.AddChild(normalButton)
 	rootContainer.AddChild(hardButton)
 	menu.Buttons = []*widget.Button{easyButton, normalButton, hardButton}
-	easyButton.Focus(true)
 	ui := ebitenui.UI{
 		Container: rootContainer,
 	}
